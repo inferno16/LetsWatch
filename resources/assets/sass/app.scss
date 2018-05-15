@@ -1,0 +1,61 @@
+
+// Fonts
+@import url("https://fonts.googleapis.com/css?family=Raleway:300,400,600");
+
+// Variables
+@import "variables";
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+@mixin aspect-ratio($width, $height) {
+  position: relative;
+  &:before {
+    display: block;
+    content: "";
+    width: 100%;
+    padding-top: ($height / $width) * 100%;
+  }
+  > .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+#room-users {
+  margin-bottom: 5px;
+  height: 50px;
+}
+
+#player-wrapper {
+  @include aspect-ratio(16, 9);
+  .content {
+    right: 5px;
+  }
+  .card {
+    height: 100%;
+  }
+}
+
+#chat-wrapper {
+  //background-color: #3f3f3f;
+  @include aspect-ratio(16, 9);
+  .content {
+    left: 5px;
+  }
+  .card {
+    height: 100%;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  #player-wrapper, #chat-wrapper {
+    .content {
+      left: 0;
+      right: 0;
+    }
+  }
+}
