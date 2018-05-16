@@ -10411,6 +10411,10 @@ a.text-dark:focus {
   }
 }
 
+#main {
+  padding: 5px;
+}
+
 #room-users {
   margin-bottom: 5px;
   height: 50px;
@@ -10418,6 +10422,7 @@ a.text-dark:focus {
 
 #player-wrapper {
   position: relative;
+  padding: 0 5px 0 0;
 }
 
 #player-wrapper:before {
@@ -10444,26 +10449,7 @@ a.text-dark:focus {
 }
 
 #chat-wrapper {
-  position: relative;
-}
-
-#chat-wrapper:before {
-  display: block;
-  content: "";
-  width: 100%;
-  padding-top: 56.25%;
-}
-
-#chat-wrapper > .content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-#chat-wrapper .content {
-  left: 5px;
+  padding: 0 0 0 5px;
 }
 
 #chat-wrapper .card {
@@ -10471,6 +10457,11 @@ a.text-dark:focus {
 }
 
 @media (max-width: 991.98px) {
+  #player-wrapper,
+  #chat-wrapper {
+    padding: 0;
+  }
+
   #player-wrapper .content,
   #chat-wrapper .content {
     left: 0;

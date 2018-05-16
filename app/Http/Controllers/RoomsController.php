@@ -18,7 +18,6 @@ class RoomsController extends Controller
         }
         else {
             $room->guest_owner = 1;
-            $room->owner = session()->getId();
         }
         $room->save();
         $data = $this->encodeID($room->id);
@@ -36,7 +35,7 @@ class RoomsController extends Controller
 
 
     // The code below is a temporary solution
-    
+
     private function encodeID($id) {
         $idb64 = Base64Url::encode($id);
         $token = Base64Url::generate(6);
