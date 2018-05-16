@@ -10,7 +10,9 @@
 
 try {
 //     window.$ = window.jQuery = require('jquery');
+    window.uWS = require('./common/uWebClient');
     window.LWxYT = require('./platforms/youtube');
+    window.LWxFB = require('./platforms/facebook');
     require('bootstrap');
 } catch (e) {}
 

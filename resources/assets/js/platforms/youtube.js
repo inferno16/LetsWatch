@@ -1,4 +1,4 @@
-module.exports = (function(GLOBAL){
+module.exports = (function(){
     var ws;
     var player = undefined;
     var iframe;
@@ -84,7 +84,6 @@ module.exports = (function(GLOBAL){
         var prevState = statusListener;
         statusListener = sl;
         sync.statusRequest = true;
-        document.getElementById("debug").innerHTML += e.data+'<br>';
         if(e.data.match(/^video: /i)) {
             NewVideo(e.data.substring(7, e.data.length));
         }
