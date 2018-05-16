@@ -10,7 +10,7 @@
 
 try {
 //     window.$ = window.jQuery = require('jquery');
-
+    window.LWxYT = require('./platforms/youtube');
     require('bootstrap');
 } catch (e) {}
 

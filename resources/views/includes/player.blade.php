@@ -1,3 +1,3 @@
 <div class="card">
-    Player goes here
+    <div id="player"></div>
 </div>
