@@ -16,7 +16,7 @@
         "cross-env": "^5.1",
         "jquery": "^3.2",
         "laravel-mix": "^2.0",
-        "lodash": "^4.17.4",
-        "vue": "^2.5.7"
+        "ajv": "^6.0.0",
+        "slim-player": "https://github.com/inferno16/SlimPlayer.git"
     }
 }
