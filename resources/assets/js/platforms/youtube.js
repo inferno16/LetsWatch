@@ -7,13 +7,16 @@ module.exports = (function(){
     var d = new Date();
     var sl = statusListener;
     var lastTime = {};
+    var synced;
 
     function InitYouTubeSync(uWebSocketConnection) {
         ws = uWebSocketConnection;
         ws.addEventListener('message', MessageHandler);
+        synced = true;
     }
 
     function RemoveYouTubeSync(hard = false) {
+        synced = false;
         ws.removeEventListener('message', MessageHandler);
         if(player !== undefined) {
             player.destroy();
@@ -179,8 +182,9 @@ module.exports = (function(){
     }
 
     return {
-        InitYouTubeSync: InitYouTubeSync,
-        RemoveYouTubeSync: RemoveYouTubeSync,
+        IsSynced: synced,
+        InitSync: InitYouTubeSync,
+        RemoveSync: RemoveYouTubeSync,
         NewVideo: NewVideo
     };
 })();

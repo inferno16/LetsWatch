@@ -8,7 +8,7 @@
 @section('content')
 <div class="row">
     <div id="room-users" class="col-lg-12 card">
-        Room users go here.
+        <input type="text" id="media-url"><input type="button" id="load-btn" value="Load">
     </div>
 </div>
 

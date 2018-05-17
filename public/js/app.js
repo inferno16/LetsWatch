@@ -18728,19 +18728,9 @@ module.exports = g;
 
 __webpack_require__("./resources/assets/js/bootstrap.js");
 
-//window.Vue = require('vue');
+window.LW = __webpack_require__("./resources/assets/js/common/wrapper.js");
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-//Vue.component('example-component', require('./components/ExampleComponent.vue'));
-
-// const app = new Vue({
-//     el: '#app'
-// });
+LW.CreateEventHandlers();
 
 /***/ }),
 
@@ -18758,10 +18748,7 @@ __webpack_require__("./resources/assets/js/bootstrap.js");
  */
 
 try {
-  //     window.$ = window.jQuery = require('jquery');
-  window.uWS = __webpack_require__("./resources/assets/js/common/uWebClient.js");
-  window.LWxYT = __webpack_require__("./resources/assets/js/platforms/youtube.js");
-  window.LWxFB = __webpack_require__("./resources/assets/js/platforms/facebook.js");
+  //  window.$ = window.jQuery = require('jquery');
   __webpack_require__("./node_modules/bootstrap/dist/js/bootstrap.js");
 } catch (e) {}
 
@@ -18877,6 +18864,85 @@ module.exports = function () {
 
 /***/ }),
 
+/***/ "./resources/assets/js/common/wrapper.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+// WebSocket client logic
+window.uWS = __webpack_require__("./resources/assets/js/common/uWebClient.js");
+
+// Patform scripts 
+window.LWxYT = __webpack_require__("./resources/assets/js/platforms/youtube.js");
+window.LWxFB = __webpack_require__("./resources/assets/js/platforms/facebook.js");
+
+module.exports = function () {
+    var Platform = { name: '', object: {} };
+    var ws = uWS.connect();
+
+    function InitPlatformFromUrl(url) {
+        // First of all strip parameters and trim spaces and slashes from the URL
+        url = url.indexOf('&') !== -1 ? url.substring(0, url.indexOf('&')) : url;
+        url = url.trim();
+        url = url.replace(/\/+$/, '');
+
+        var regex = /^(https?:\/\/)?(www\.)?([A-Za-z0-9_\-.]+)\.(\w{2,3})\/(.+)$/i;
+        var matches = regex.exec(url);
+        if (matches !== null) {
+            matches[3] = matches[3].toLowerCase(); // site name
+            matches[4] = matches[4].toLowerCase(); // site TLD
+            switch (matches[3]) {
+                case 'youtube':
+                    if (matches[4] === 'com' && matches[5].match(/^watch\?v=[A-Za-z0-9_\-]{11}$/i)) {
+                        if (Platform.name !== '' && Platform.name === matches[3]) Platform.object.RemoveSync();
+                        Platform.name = matches[3];
+                        Platform.object = LWxYT;
+                    }
+                    break;
+                case 'facebook':
+                    if (matches[4] === 'com' && matches[5].match(/^[a-zA-Z0-9_.\-]+\/videos\/[0-9]+$/i)) {
+                        // Might have to add more checks since Facebook requires the whole URL
+                        // instead of just the key
+                        if (Platform.name !== '' && Platform.name === matches[3]) Platform.object.RemoveSync();
+                        Platform.name = matches[3];
+                        Platform.object = LWxFB;
+                    }
+                    break;
+                default:
+                    Platform.object = null;
+                    break;
+            }
+        }
+    }
+
+    function NewVideo(url) {
+        InitPlatformFromUrl(url);
+        if (Platform.object) {
+            if (!Platform.object.IsSynced) {
+                Platform.object.InitSync(ws);
+            }
+            Platform.object.NewVideo(url);
+        }
+    }
+
+    function CreateEventHandlers() {
+        var url = document.getElementById('media-url');
+        var btn = document.getElementById('load-btn');
+        if (url && btn) {
+            btn.addEventListener('click', function () {
+                if (url.value.trim() !== '') {
+                    NewVideo(url.value);
+                    url.value = '';
+                }
+            });
+        }
+    }
+
+    return {
+        CreateEventHandlers: CreateEventHandlers
+    };
+}();
+
+/***/ }),
+
 /***/ "./resources/assets/js/platforms/facebook.js":
 /***/ (function(module, exports) {
 
@@ -18891,6 +18957,7 @@ module.exports = function () {
     var playing = false;
     var appID = '2197920740427350';
     var apiVersion = 'v2.6';
+    var synced = false;
 
     function FBInit() {
         FB.init({
@@ -18944,11 +19011,13 @@ module.exports = function () {
         ws = uWebSocketConnection;
         ws.addEventListener('message', MessageHandler);
         FBInit();
+        synced = true;
     }
 
     function RemoveFacebookSync() {
         var hard = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
+        synced = false;
         ws.removeEventListener('message', MessageHandler);
         var playerDiv = document.getElementById('player');
         if (!playerDiv) {
@@ -18975,6 +19044,7 @@ module.exports = function () {
         }
         var div = DestroyPlayer();
         div.setAttribute('class', 'fb-video');
+        div.setAttribute('data-width', '300');
         div.setAttribute('data-href', url);
         FB.XFBML.parse();
     }
@@ -19013,8 +19083,9 @@ module.exports = function () {
     }
 
     return {
-        InitFacebookSync: InitFacebookSync,
-        RemoveFacebookSync: RemoveFacebookSync,
+        IsSynced: synced,
+        InitSync: InitFacebookSync,
+        RemoveSync: RemoveFacebookSync,
         NewVideo: NewVideo
     };
 }();
@@ -19033,15 +19104,18 @@ module.exports = function () {
     var d = new Date();
     var sl = statusListener;
     var lastTime = {};
+    var synced;
 
     function InitYouTubeSync(uWebSocketConnection) {
         ws = uWebSocketConnection;
         ws.addEventListener('message', MessageHandler);
+        synced = true;
     }
 
     function RemoveYouTubeSync() {
         var hard = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
+        synced = false;
         ws.removeEventListener('message', MessageHandler);
         if (player !== undefined) {
             player.destroy();
@@ -19209,8 +19283,9 @@ module.exports = function () {
     }
 
     return {
-        InitYouTubeSync: InitYouTubeSync,
-        RemoveYouTubeSync: RemoveYouTubeSync,
+        IsSynced: synced,
+        InitSync: InitYouTubeSync,
+        RemoveSync: RemoveYouTubeSync,
         NewVideo: NewVideo
     };
 }();

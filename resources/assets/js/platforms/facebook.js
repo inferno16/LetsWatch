@@ -9,6 +9,7 @@ module.exports = (function(){
     var playing = false;
     var appID = '2197920740427350';
     var apiVersion = 'v2.6';
+    var synced = false;
 
     function FBInit() {
         FB.init({
@@ -63,9 +64,11 @@ module.exports = (function(){
         ws = uWebSocketConnection;
         ws.addEventListener('message', MessageHandler);
         FBInit();
+        synced = true;
     }
 
     function RemoveFacebookSync(hard = false) {
+        synced = false;
         ws.removeEventListener('message', MessageHandler);
         var playerDiv = document.getElementById('player');
         if(!playerDiv) {
@@ -91,6 +94,7 @@ module.exports = (function(){
         if(!url.match(/^https:\/\/www\.facebook\.com\/[a-zA-Z0-9_.\-]+\/videos\/[0-9]+\/?$/)) {return;}
         var div = DestroyPlayer();
         div.setAttribute('class', 'fb-video');
+        div.setAttribute('data-width', '300');
         div.setAttribute('data-href', url);
         FB.XFBML.parse();
     }
@@ -137,8 +141,9 @@ module.exports = (function(){
     }
 
     return {
-        InitFacebookSync: InitFacebookSync,
-        RemoveFacebookSync: RemoveFacebookSync,
+        IsSynced: synced,
+        InitSync: InitFacebookSync,
+        RemoveSync: RemoveFacebookSync,
         NewVideo: NewVideo
     };
 })();
