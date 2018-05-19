@@ -4,6 +4,7 @@ window.uWS = require('./uWebClient');
 // Patform scripts 
 window.LWxYT = require('../platforms/youtube');
 window.LWxFB = require('../platforms/facebook');
+window.LWxSP = require('../platforms/proprietary');
 
 module.exports = (function(){
     var Platform = {name:'', object: {}};
@@ -23,27 +24,37 @@ module.exports = (function(){
             switch(matches[3]) {
                 case 'youtube':
                     if(matches[4] === 'com' && matches[5].match(/^watch\?v=[A-Za-z0-9_\-]{11}$/i)) {
-                        if(Platform.name !== '' && Platform.name === matches[3])
-                            Platform.object.RemoveSync();
-                        Platform.name = matches[3];
-                        Platform.object = LWxYT;
+                        InitPlatform(matches[3], LWxYT);
                     }
                     break;
                 case 'facebook':
                     if(matches[4] === 'com' && matches[5].match(/^[a-zA-Z0-9_.\-]+\/videos\/[0-9]+$/i)) {
                         // Might have to add more checks since Facebook requires the whole URL
                         // instead of just the key
-                        if(Platform.name !== '' && Platform.name === matches[3])
-                            Platform.object.RemoveSync();
-                        Platform.name = matches[3];
-                        Platform.object = LWxFB;
+                        InitPlatform(matches[3], LWxFB);
                     }
                     break;
                 default:
-                    Platform.object = null;
+                    var extRegEx = /\.([A-Za-z0-9]{3,4})$/;
+                    var extension = extRegEx.exec(matches[5]);
+                    if(extension !== null && LWxSP.AllowedExtensions.indexOf(extension[1].toLowerCase()) !== -1) {
+                        InitPlatform('proprietary', LWxSP);
+                    }
+                    else {
+                        if(Platform.object && Platform.name)
+                            Platform.object.RemoveSync();
+                        Platform.object = null;
+                    }
                     break;
             }
         }
+    }
+
+    function InitPlatform(name, newPlatform) {
+        if(Platform.object && Platform.name && Platform.name !== name)
+            Platform.object.RemoveSync();
+        Platform.name = name;
+        Platform.object = newPlatform;
     }
 
     function NewVideo(url) {
@@ -70,6 +81,7 @@ module.exports = (function(){
     }
 
     return {
-        CreateEventHandlers: CreateEventHandlers
+        CreateEventHandlers: CreateEventHandlers,
+        NewVideo: NewVideo
     };
 })();

@@ -10,6 +10,8 @@
 
 try {
 //  window.$ = window.jQuery = require('jquery');
+    require('slim-slidy');
+    require('slim-player');
     require('bootstrap');
 } catch (e) {}
 

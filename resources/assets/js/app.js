@@ -8,5 +8,3 @@
 require('./bootstrap');
 
 window.LW = require('./common/wrapper');
-
-LW.CreateEventHandlers()

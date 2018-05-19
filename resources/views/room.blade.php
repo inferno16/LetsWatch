@@ -5,6 +5,10 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 @endsection
 
+@section('style')
+<link rel="stylesheet" href="{{mix('css/SlimPlayer.css')}}">
+@endsection
+
 @section('content')
 <div class="row">
     <div id="room-users" class="col-lg-12 card">
@@ -22,4 +26,10 @@
             @include('includes.chat')
     </div>
 </div>
+@endsection
+
+@section('body-end')
+<script>
+    LW.CreateEventHandlers();
+</script>
 @endsection

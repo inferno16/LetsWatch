@@ -18688,6 +18688,542 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/slim-player/SlimPlayer.scss":
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+
+/***/ "./node_modules/slim-player/slimplayer.js":
+/***/ (function(module, exports) {
+
+window.SlimPlayer = (function(){
+    var seekPaused = false;
+    var playPathD = 'M10,10 25,18 20,18 10,18 Z M10,18 20,18 25,18 10,26 Z';
+    var pausePathD = 'M10,25 10,10 15,10 15,25 Z M17,25 17,10 22,10 22,25 Z';
+    var players = [];
+    function PlayerElements() {
+        var _controlEnabled = true;
+        this.Player = null;
+        this.ControlsWrapper = null;
+        this.PlayButton = null;
+        this.SeekSlider = null;
+        this.VolumeSlider = null;
+        this.FullScreenButton = null;
+        this.TimeInfo = null;
+        this.ControlEnabled = function() {
+            return _controlEnabled;
+        }
+        this.ToggleControl = function() {
+            if(_controlEnabled) {
+                this.PlayButton.addEventListener('click', PlayPauseHandler);
+            }
+            else {
+                this.PlayButton.removeEventListener('click', PlayPauseHandler);
+            }
+            _controlEnabled = !_controlEnabled;
+        }
+    };
+
+    function AutoCreatePlayers() {
+        var elements = document.getElementsByClassName("SlimPlayer");
+        for (let i = 0; i < elements.length; i++) {
+            if(elements[i].tagName === "VIDEO") {
+                ConstructPlayer(elements[i]);
+            }
+        }
+    }
+
+    function CreatePlayerFromElement(element) {
+        if(element.tagName === "VIDEO") {
+            return ConstructPlayer(element);
+        }
+        return null;
+    }
+
+    function ConstructPlayer(videoNode) {
+        var pe = new PlayerElements();
+        pe.Player = videoNode;
+        videoNode.addEventListener('play', PlayHandler);
+        videoNode.addEventListener('pause', PauseHandler);
+        videoNode.addEventListener('timeupdate', TimeUpdateHandler);
+        videoNode.addEventListener('buffer', BufferProgressHandler);
+        var nextSibling = videoNode.nextElementSibling;
+        var parent = videoNode.parentNode;
+        var playerWrapper = CreateElement("slimplayer-wrapper");
+        playerWrapper.appendChild(videoNode);
+        playerWrapper.addEventListener('mouseover', ShowControlsHandler);
+        playerWrapper.addEventListener('mouseout', HideControlsHandler);
+        parent.insertBefore(playerWrapper, nextSibling);
+        var controls = CreateElement("controls");
+        pe.ControlsWrapper = controls;
+        var seekbar = CreateElement("seekbar");
+        var seekSlider = CreateElement("range_slider");
+        var mainTrack = CreateElement();
+        mainTrack.setAttribute("main", 1);
+        seekSlider.appendChild(mainTrack);
+        seekSlider.appendChild(CreateElement());
+        seekSlider.addEventListener("sliderProgressChanged", SliderProgressHandler);
+        seekSlider.addEventListener("sliderSeek", SeekStartHandler);
+        seekSlider.addEventListener("sliderSeekEnd", SeekEndHandler);
+        pe.SeekSlider = SlimSlidy.CreateSliderFromElement(seekSlider);
+        seekbar.appendChild(seekSlider);
+        controls.appendChild(seekbar);
+        var playbutton = CreateElement("playbutton left");
+        var playsvg = CreateSvg(playPathD);
+        var playpath = playsvg.getElementsByTagName('path')[0];
+        playpath.appendChild(CreateAnimate("animation-pause", "200ms", pausePathD));
+        playpath.appendChild(CreateAnimate("animation-play", "200ms", playPathD));
+        playbutton.appendChild(playsvg);
+        playbutton.addEventListener('click', PlayPauseHandler);
+        pe.PlayButton = playbutton;
+        controls.appendChild(playbutton);
+        var timeInfo = CreateElement("timeInfo left", "span");
+        timeInfo.innerText = "00:00/00:00";
+        pe.TimeInfo = timeInfo;
+        controls.appendChild(timeInfo);
+        var right = CreateElement("right");
+        var volume = CreateElement("volume left");
+        var volumeSlider = CreateElement("range_slider");
+        mainTrack = CreateElement();
+        mainTrack.setAttribute("main", 1);
+        var volumeValue = (sessionStorage && 'volume' in sessionStorage) ? sessionStorage.volume : 1;
+        volumeSlider.setAttribute("initial", volumeValue * 100);
+        pe.Player.volume = volumeValue;
+        volumeSlider.appendChild(mainTrack);
+        volumeSlider.addEventListener('sliderProgressChanged', VolumeHandler);
+        volumeSlider.addEventListener('sliderSeek', VolumeHandler);
+        volumeSlider.addEventListener('sliderSeekEnd', VolumeChangedHandler);
+        pe.VolumeSlider = SlimSlidy.CreateSliderFromElement(volumeSlider);
+        volume.appendChild(volumeSlider);
+        right.appendChild(volume);
+        var fullscreen = CreateElement("fullscreen left");
+        fullscreen.appendChild(CreateSvg(
+            "M10,10 28,10 28,24 10,24 Z M12,12 26,12 26,22 12,22 Z  M13,13 13,16 16,13 Z M25,13 25,16 22,13 M25,21 22,21 25,18 M13,21 13,18 16,21",
+                "evenodd"));
+        fullscreen.addEventListener("click", FullScreenHandler);
+        pe.FullScreenButton = fullscreen;
+        right.appendChild(fullscreen);
+        controls.appendChild(right);
+        playerWrapper.appendChild(controls);
+        var conrEvt = new CustomEvent("playerConstructionDone");
+        document.dispatchEvent(conrEvt);
+        players.push(pe);
+        return pe;
+    }
+
+    function DestroyPlayer(playerObject, hard = false) {
+        var index = players.indexOf(playerObject);
+        if(index > -1) {
+            var wrapper = playerObject.Player.parentNode;
+            if(!hard) {
+                wrapper.parentNode.insertBefore(playerObject.Player, wrapper);
+            }
+            wrapper.parentNode.removeChild(wrapper);
+            players.splice(index, 1);
+        }
+    }
+
+    function CreateElement(cls="", type="div"){
+        var el = document.createElement(type);
+        if(cls!==""){el.setAttribute("class", cls);}
+        return el;
+    }
+
+    function CreateSvg(pathd, fillrule = "", viewBox="0 0 36 36", fill="#d1d1d1"){
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', "svg");
+        svg.setAttribute("viewBox", viewBox);
+        svg.setAttribute("fill", fill);
+        var path = document.createElementNS('http://www.w3.org/2000/svg',"path");
+        path.setAttribute("d", pathd);
+        if(fillrule !== "") {path.setAttribute("fill-rule", fillrule);}
+        svg.appendChild(path);
+        return svg;
+    }
+
+    function CreateAnimate(className, duration, to, attrName="d"){
+        var animate = document.createElementNS('http://www.w3.org/2000/svg', "animate");
+        animate.setAttribute('class', className);
+        animate.setAttribute('begin', 'indefinite');
+        animate.setAttribute('fill', 'freeze');
+        animate.setAttribute('attributeName', attrName);
+        animate.setAttribute('dur', duration);
+        animate.setAttribute('to', to);
+        return animate;
+    }
+
+    function FullScreenHandler() {
+        var player = this.parentNode.parentNode.previousElementSibling;
+        if (player.requestFullscreen) {
+            player.requestFullscreen();
+        } else if (player.mozRequestFullScreen) {
+            player.mozRequestFullScreen();
+        } else if (player.webkitRequestFullscreen) {
+            player.webkitRequestFullscreen();
+        }
+    }
+
+    function getTimeString(time) {
+        time = (isNaN(time)) ? 0 : time;
+        time = Math.round(time);
+        var minutes = Math.floor(time / 60);
+        var seconds = time % 60;
+        if(minutes < 10) {
+            minutes = '0'+minutes;
+        }
+        if(seconds < 10) {
+            seconds = '0'+seconds;
+        }
+        return minutes+':'+seconds;
+    }
+
+    function PlayHandler() {
+        var path = this.parentNode.getElementsByTagName("path")[0];
+        var aniPause = this.parentNode.getElementsByClassName("animation-pause")[0];
+        animatePlayPause(path, aniPause);
+    }
+
+    function PauseHandler() {
+        var path = this.parentNode.getElementsByTagName("path")[0];
+        var aniPlay = this.parentNode.getElementsByClassName("animation-play")[0];
+        animatePlayPause(path, aniPlay);
+    }
+
+    function PlayPauseHandler() {
+        var player = this.parentNode.parentNode.getElementsByTagName('video')[0];
+        if(player.paused) {
+            player.play();
+        }
+        else {
+            player.pause();
+        }
+    }
+
+    function animatePlayPause(path, animation) {
+        if('beginElement' in animation) {
+            animation.beginElement();
+        }
+        else {
+            path.setAttribute('d', animation.getAttribute('to'));
+        }
+    }
+
+    function TimeUpdateHandler() {
+        var timeSpan = this.parentNode.getElementsByClassName("timeInfo")[0];
+        var seekbar = this.parentNode.getElementsByClassName("seekbar")[0].getElementsByClassName("range_slider")[0];
+        
+        SlimSlidy.GetSliderFromElement(seekbar).SetCurrent(0, this.currentTime/this.duration);
+        timeSpan.innerText = getTimeString(this.currentTime)+'/'+getTimeString(this.duration);
+    }
+
+    function GetBufferEnd(player) {
+        for (let i = 0; i < player.buffered.length; i++) {
+            if(player.buffered.start(i) < player.currentTime && player.buffered.end(i) > player.currentTime){
+                return player.buffered.end(i);
+            }
+        }
+        return 0;
+    }
+
+    function BufferProgressHandler() {
+        var seekbar = this.parentNode.getElementsByClassName("seekbar")[0].getElementsByClassName("range_slider")[0];
+        var endOfBuffer = GetBufferEnd(this);
+        
+        SlimSlidy.GetSliderFromElement(seekbar).SetCurrent(1, endOfBuffer / this.duration);
+    }
+
+    function SliderProgressHandler(e, obj) {
+        obj = obj || this;
+        var player = obj.parentNode.parentNode.previousElementSibling;
+        if(obj && obj !== this){player.pause();}
+        player.currentTime = e.detail.current * player.duration / 100;
+    }
+
+    function SeekStartHandler(e){
+        seekPaused = true;
+        SliderProgressHandler(e, this);
+    }
+
+    function SeekEndHandler() {
+        if(seekPaused) {
+            seekPaused = false;
+        }
+        var player = this.parentNode.parentNode.previousElementSibling;
+        var seekevt = new CustomEvent('SlimPlayerSeek', {detail: player.currentTime});
+        player.dispatchEvent(seekevt);
+
+    }
+    
+
+    function VolumeHandler(e) {
+        var player = this.parentNode.parentNode.parentNode.previousElementSibling;
+        player.volume = e.detail.current / 100;
+    }
+
+    function VolumeChangedHandler() {
+        if(sessionStorage) {
+            var player = this.parentNode.parentNode.parentNode.previousElementSibling;
+            sessionStorage.setItem('volume', player.volume);
+        }
+    }
+
+    function ShowControlsHandler() {
+        var controls = this.parentNode.getElementsByClassName('controls')[0];
+        controls.style = 'display: block;';
+    }
+
+    function HideControlsHandler() {
+        var controls = this.parentNode.getElementsByClassName('controls')[0];
+        controls.style = 'display: none;';
+    }
+
+    function GetPlayerFromElement(elem) {
+        for (let i = 0; i < players.length; i++) {
+            if(elem === players[i].Player) {
+                return player[i];
+            }
+        }
+        return null;
+    }
+
+    function GetFirstPlayer() {
+        return (players.length) ? players[0] : null;
+    }
+
+    return {
+        AutoCreatePlayers: AutoCreatePlayers,
+        CreatePlayerFromElement: CreatePlayerFromElement,
+        DestroyPlayer: DestroyPlayer,
+        GetPlayerFromElement: GetPlayerFromElement,
+        GetFirstPlayer: GetFirstPlayer
+    }
+})();
+
+/***/ }),
+
+/***/ "./node_modules/slim-slidy/slimslidy.js":
+/***/ (function(module, exports) {
+
+window.SlimSlidy = (function(){
+    'use strict';
+    var elements;
+    var sliders = [];
+    var md = 0;
+    var evt;
+    var lastSlider;
+
+    function Track() {
+        this.elem = Object();
+        this.current = 0;
+    }
+
+    function RangeSlider() {
+        this.self = Object();
+        this.tracks = [];
+        this.min = 0;
+        this.max = 100;
+        this.step = 1;
+    }
+
+    RangeSlider.prototype.SetCurrent = function(trackNum, percentage, trigger = false) {
+        if(percentage < 0) {
+            percentage = 0;
+        }
+        if(percentage > 1) {
+            percentage = 1;
+        }
+        var sliderRange = this.max - this.min;
+        var offset = percentage * sliderRange;
+        this.tracks[trackNum].current = this.min + offset;
+        UpdateProgress(this.tracks[trackNum], percentage*100);
+        if(!trigger) {
+            return;
+        }
+        var spcevt = new CustomEvent('sliderProgressChanged', {detail: this.tracks[trackNum]});
+        this.self.dispatchEvent(spcevt);
+    }
+
+    window.addEventListener('mousemove', function(e){
+        evt = window.event || e;
+    });
+
+    function InitMouseUp() {
+        if(document.body) {
+            document.body.addEventListener('mouseup', MouseUpHandler);
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", function(event) {
+                document.body.addEventListener('mouseup', MouseUpHandler);
+            });
+        }
+
+        function MouseUpHandler() {
+            if (md) {
+                ChangeValue(lastSlider, 0);
+                md = 0;
+                var seekendevt = new CustomEvent('sliderSeekEnd', { detail: lastSlider.tracks[0] });
+                lastSlider.self.dispatchEvent(seekendevt);
+            }
+        }
+    }
+
+    function CreateSliderFromElement(elem) {
+        if(!IsCreated(elem)) {
+            return ConstructSlider(elem);
+        }
+        return GetSliderFromElement(elem);
+    }
+
+    function AutoCreateSliders() {
+        elements = document.getElementsByClassName('range_slider');
+        if(elements.length > 0) {
+            ConstructSliders();
+        }
+    }
+
+    function IsCreated(elem) {
+        for(var i = 0; i < sliders.length; i++) {
+            if (sliders[i].self === elem) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function ConstructSliders() 
+    {
+        for (var i = 0; i < elements.length; i++) {
+            if(!IsCreated(elements[i])) {
+                ConstructSlider(elements[i])
+            }
+        }
+    }
+
+    function ConstructSlider(element) {
+        var childCount = element.getElementsByTagName('*').length;
+        if(childCount > 0 && childCount <= 2) {
+            return InitTracks(element)
+        }
+        return null;
+    }
+
+    function InitTracks(elem)
+    {
+        var tracks = elem.getElementsByTagName('*');
+        var mainTrack = -1;
+        for (var i = 0; i < tracks.length; i++) {
+            if(tracks[i].getAttribute('main') === '1') {
+                mainTrack = i;
+            }
+        }
+        if(mainTrack !== -1) {
+            var slider = new RangeSlider();
+            slider.self = elem;
+            var track1 = new Track();
+            track1.elem = tracks[mainTrack];
+            slider.tracks.push(track1);
+            if (tracks.length === 2) {
+                var track2 = new Track();
+                track2.elem = tracks[1 - mainTrack];
+                slider.tracks.push(track2);
+            }
+            var min = parseInt(elem.getAttribute('min'));
+            var max = parseInt(elem.getAttribute('max'));
+            var step = parseInt(elem.getAttribute('step'));
+            var initial = parseInt(elem.getAttribute('initial'));
+            if(Number.isInteger(min))
+                slider.min = min;
+            if(Number.isInteger(max))
+                slider.max = max;
+            if(Number.isInteger(step))
+                slider.step = step;
+            if(Number.isInteger(initial)) {
+                slider.SetCurrent(0, initial/(slider.max-slider.min));
+            }
+            ApplyStyle(slider);
+            sliders.push(slider);
+            AddHandlers(slider);
+            return slider;
+        }
+        return null;
+    }
+
+    function ApplyStyle(slider) {
+        var element = slider.self;
+        element.style.cursor = 'pointer';
+        if(element.style.height === '')
+            element.style.height = '5px';
+        if(element.style.background === '')
+            element.style.background = '#555555';
+        var main = slider.tracks[0].elem;
+        if(main.style.background === '')
+            main.style.background = '#ff0000';
+        if(main.style.height === '')
+            main.style.height = '100%';
+        main.style.float = 'left';
+        if(slider.tracks.length > 1) {
+            var second = slider.tracks[1].elem;
+            if(second.style.background === '')
+                second.style.background = '#9d9d9d';
+            if(second.style.height === '')
+                second.style.height = '100%';
+            if(second.style.width === '')
+                second.style.width = '0';
+        }
+    }
+
+    function UpdateProgress(track, percentage) {
+        track.elem.style.width = percentage+'%';
+    }
+
+    function GetSliderFromElement(elem) {
+        for (let i = 0; i < sliders.length; i++) {
+            if(elem === sliders[i].self) {
+                return sliders[i];
+            }
+        }
+        return null;
+    }
+
+    function ChangeValue(slider, trackNum, trigger = true) 
+    {
+        var mouseX = evt.clientX;
+        var elemRect = slider.self.getBoundingClientRect();
+        var width = elemRect.right - elemRect.left;
+        var relClick = mouseX - elemRect.left;
+        var percentage = relClick / width;
+        slider.SetCurrent(trackNum, percentage, trigger);
+    }
+
+    function AddHandlers(slider)
+    {
+        slider.self.addEventListener('mousedown', function(){
+            md = 1;
+            lastSlider = slider;
+            document.body.onmousemove = function(){
+                setTimeout(function(){
+                    if(md) {
+                        ChangeValue(slider, 0, false);
+                        var seekevt = new CustomEvent('sliderSeek', {detail: lastSlider.tracks[0]});
+                        lastSlider.self.dispatchEvent(seekevt);
+                    }
+                },50);
+            };
+        });
+    }
+
+    InitMouseUp();
+
+    return {
+        GetSliderFromElement: GetSliderFromElement,
+        CreateSliderFromElement: CreateSliderFromElement,
+        AutoCreateSliders: AutoCreateSliders
+    }
+})();
+
+/***/ }),
+
 /***/ "./node_modules/webpack/buildin/global.js":
 /***/ (function(module, exports) {
 
@@ -18730,8 +19266,6 @@ __webpack_require__("./resources/assets/js/bootstrap.js");
 
 window.LW = __webpack_require__("./resources/assets/js/common/wrapper.js");
 
-LW.CreateEventHandlers();
-
 /***/ }),
 
 /***/ "./resources/assets/js/bootstrap.js":
@@ -18749,6 +19283,8 @@ LW.CreateEventHandlers();
 
 try {
   //  window.$ = window.jQuery = require('jquery');
+  __webpack_require__("./node_modules/slim-slidy/slimslidy.js");
+  __webpack_require__("./node_modules/slim-player/slimplayer.js");
   __webpack_require__("./node_modules/bootstrap/dist/js/bootstrap.js");
 } catch (e) {}
 
@@ -18873,6 +19409,7 @@ window.uWS = __webpack_require__("./resources/assets/js/common/uWebClient.js");
 // Patform scripts 
 window.LWxYT = __webpack_require__("./resources/assets/js/platforms/youtube.js");
 window.LWxFB = __webpack_require__("./resources/assets/js/platforms/facebook.js");
+window.LWxSP = __webpack_require__("./resources/assets/js/platforms/proprietary.js");
 
 module.exports = function () {
     var Platform = { name: '', object: {} };
@@ -18892,25 +19429,34 @@ module.exports = function () {
             switch (matches[3]) {
                 case 'youtube':
                     if (matches[4] === 'com' && matches[5].match(/^watch\?v=[A-Za-z0-9_\-]{11}$/i)) {
-                        if (Platform.name !== '' && Platform.name === matches[3]) Platform.object.RemoveSync();
-                        Platform.name = matches[3];
-                        Platform.object = LWxYT;
+                        InitPlatform(matches[3], LWxYT);
                     }
                     break;
                 case 'facebook':
                     if (matches[4] === 'com' && matches[5].match(/^[a-zA-Z0-9_.\-]+\/videos\/[0-9]+$/i)) {
                         // Might have to add more checks since Facebook requires the whole URL
                         // instead of just the key
-                        if (Platform.name !== '' && Platform.name === matches[3]) Platform.object.RemoveSync();
-                        Platform.name = matches[3];
-                        Platform.object = LWxFB;
+                        InitPlatform(matches[3], LWxFB);
                     }
                     break;
                 default:
-                    Platform.object = null;
+                    var extRegEx = /\.([A-Za-z0-9]{3,4})$/;
+                    var extension = extRegEx.exec(matches[5]);
+                    if (extension !== null && LWxSP.AllowedExtensions.indexOf(extension[1].toLowerCase()) !== -1) {
+                        InitPlatform('proprietary', LWxSP);
+                    } else {
+                        if (Platform.object && Platform.name) Platform.object.RemoveSync();
+                        Platform.object = null;
+                    }
                     break;
             }
         }
+    }
+
+    function InitPlatform(name, newPlatform) {
+        if (Platform.object && Platform.name && Platform.name !== name) Platform.object.RemoveSync();
+        Platform.name = name;
+        Platform.object = newPlatform;
     }
 
     function NewVideo(url) {
@@ -18937,7 +19483,8 @@ module.exports = function () {
     }
 
     return {
-        CreateEventHandlers: CreateEventHandlers
+        CreateEventHandlers: CreateEventHandlers,
+        NewVideo: NewVideo
     };
 }();
 
@@ -19088,6 +19635,122 @@ module.exports = function () {
         RemoveSync: RemoveFacebookSync,
         NewVideo: NewVideo
     };
+}();
+
+/***/ }),
+
+/***/ "./resources/assets/js/platforms/proprietary.js":
+/***/ (function(module, exports) {
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+module.exports = function () {
+    var player;
+    var us;
+    var synced = false;
+    var playerObj;
+    var allowedExtensions = ['mp3', 'mp4', 'webm'];
+
+    function InitSlimPlayerSync(uWebSocketConnection) {
+        ws = uWebSocketConnection;
+        ws.addEventListener('message', MessageHandler);
+        synced = true;
+    }
+
+    function RemoveSlimPlayerSync() {
+        var hard = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+        ws.removeEventListener('message', MessageHandler);
+        RemoveEventListeners();
+        SlimPlayer.DestroyPlayer(playerObj, true);
+        var playerDiv = document.getElementById('player');
+        if (hard) {
+            playerDiv.parentNode.removeChild(playerDiv);
+        }
+        synced = false;
+    }
+
+    function NewVideo(url) {
+        var extRegEx = /\.([A-Za-z0-9]{3,4})$/;
+        var extension = extRegEx.exec(url);
+        if (!extension) return;
+        if (!playerObj) {
+            var video = document.getElementsByClassName('SlimPlayer')[0];
+            if (video) {
+                playerObj = SlimPlayer.GetPlayerFromElement(video);
+                if (!playerObj) {
+                    playerObj = SlimPlayer.CreatePlayerFromElement(video);
+                }
+            } else {
+                video = document.createElement('video');
+                video.setAttribute('class', 'SlimPlayer');
+                var source = document.createElement('source');
+                video.appendChild(source);
+                document.getElementById('player').appendChild(video);
+                playerObj = SlimPlayer.CreatePlayerFromElement(video);
+                video.addEventListener('playerConstructionDone', AttachEventListeners);
+            }
+        }
+        player = playerObj.Player;
+        var source = player.childNodes[0];
+        source.setAttribute('src', url);
+        player.load();
+    }
+
+    function AttachEventListeners() {
+        if (playerObj.ControlEnabled()) {
+            playerObj.ToggleControl(); // Disable the functionality of the play/pause button
+        }
+        playerObj.Player.addEventListener('SlimPlayerSeek', SeekHandler);
+        playerObj.PlayButton.addEventListener('click', PlayHandler);
+    }
+
+    function RemoveEventListeners() {
+        playerObj.Player.removeEventListener('SlimPlayerSeek', SeekHandler);
+        playerObj.PlayButton.removeEventListener('click', PlayHandler);
+    }
+
+    function SeekHandler(e) {
+        uWS.sendSeekRequest(e.detail);
+    }
+
+    function PlayHandler() {
+        if (player.paused) {
+            uWS.sendPlayRequest();
+        } else {
+            uWS.sendPauseRequest();
+        }
+    }
+
+    function MessageHandler(e) {
+        if (e.data.match(/^video: /i)) {
+            NewVideo(e.data.substring(7, e.data.length));
+        } else if (e.data.match(/^player: /i)) {
+            var cmd = e.data.indexOf('(') === -1 ? e.data : e.data.substring(0, e.data.indexOf('('));
+            switch (cmd) {
+                case "player: play":
+                    player.play();
+                    break;
+                case "player: pause":
+                    player.pause();
+                    break;
+                case "player: seek":
+                    var regex = /\((\d+(\.\d+)?)\)$/;
+                    var matches = regex.exec(e.data);
+                    if (matches.length === 3) {
+                        player.currentTime = matches[1];
+                    }
+                    break;
+            }
+        }
+    }
+
+    return _defineProperty({
+        AllowedExtensions: allowedExtensions,
+        IsSynced: synced,
+        InitSync: InitSlimPlayerSync,
+        RemoveSync: RemoveSlimPlayerSync,
+        NewVideo: NewVideo }, 'NewVideo', NewVideo);
 }();
 
 /***/ }),
@@ -19303,7 +19966,8 @@ module.exports = function () {
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__("./resources/assets/js/app.js");
-module.exports = __webpack_require__("./resources/assets/sass/app.scss");
+__webpack_require__("./resources/assets/sass/app.scss");
+module.exports = __webpack_require__("./node_modules/slim-player/SlimPlayer.scss");
 
 
 /***/ })
