@@ -20,6 +20,7 @@ module.exports = (function(){
         ws.removeEventListener('message', MessageHandler);
         if(player !== undefined) {
             player.destroy();
+            player = undefined;
         }
         if(hard) {
             var playerDiv = document.getElementById('player');
@@ -37,6 +38,7 @@ module.exports = (function(){
         if((matches = regex.exec(url)).length === 4) {
             if(player !== undefined) {
                 player.destroy();
+                player = undefined;
                 done = false;
                 paused = true;
             }
@@ -57,7 +59,7 @@ module.exports = (function(){
         });
         iframe = player.getIframe();
         player.addEventListener('onReady', InitPlayer);
-        player.addEventListener('onStateChange', 'statusListener');
+        player.addEventListener('onStateChange', statusListener);
         player.getIframe().addEventListener('playerInitialized', function(){
             if(!done) {
                 statusListener = sl;
