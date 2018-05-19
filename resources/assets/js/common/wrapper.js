@@ -1,6 +1,9 @@
 // WebSocket client logic
 window.uWS = require('./uWebClient');
 
+// Chat
+window.LW_Chat = require('./chat');
+
 // Patform scripts 
 window.LWxYT = require('../platforms/youtube');
 window.LWxFB = require('../platforms/facebook');
@@ -8,7 +11,7 @@ window.LWxSP = require('../platforms/proprietary');
 
 module.exports = (function(){
     var Platform = {name:'', object: {}};
-    var ws = uWS.connect();
+    var ws = undefined;
 
     function InitPlatformFromUrl(url) {
         // First of all strip parameters and trim spaces and slashes from the URL
@@ -67,17 +70,28 @@ module.exports = (function(){
         }
     }
 
-    function CreateEventHandlers() {
-        var url = document.getElementById('media-url');
-        var btn = document.getElementById('load-btn');
-        if(url && btn) {
-            btn.addEventListener('click', function(){
-                if(url.value.trim() !== '') {
-                    NewVideo(url.value);
-                    url.value =  '';
+    function CreateEventHandlers(roomID) {
+        if(!ws) {
+           ws = uWS.connect('ws://109.104.194.40:3000/'+roomID);
+        }
+        var url_input = document.getElementById('media-url');
+        var load_btn = document.getElementById('load-btn');
+        FormAction(url_input, load_btn, NewVideo);
+        
+        LW_Chat.InitChat(ws, document.getElementById('chat-wrapper'));
+    }
+
+    function FormAction(input, button, func) {
+        if(input && button) {
+            button.addEventListener('click', function(){
+                if(input.value.trim() !== '') {
+                    func(input.value);
+                    input.value =  '';
                 }
             });
+            return true;
         }
+        return false;
     }
 
     return {

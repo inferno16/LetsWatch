@@ -30,6 +30,6 @@
 
 @section('body-end')
 <script>
-    LW.CreateEventHandlers();
+    LW.CreateEventHandlers('{{$roomID}}');
 </script>
 @endsection

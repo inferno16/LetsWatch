@@ -37,8 +37,73 @@
 
 #chat-wrapper {
     padding: 0 0 0 5px;
-    .card {
-        height: 100%;
+    .card{
+        min-height: 365px;
+        height: 365px;
+    }
+    .card-body {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-content: stretch;
+        div {
+            display: flex;
+        }
+        .messages {
+            padding: 1em;
+            overflow-y: scroll;
+            flex: 1 1 auto;
+            align-content: flex-start;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            .msg-content {
+                flex: 0 0 auto;
+                padding: 0 1em 0 1em;
+                margin-bottom: 1em;
+                width: 80%;
+                display: flex;
+                flex-direction: column-reverse;
+                background-color: #ddd;
+                border-radius: .5em;
+                * {
+                    display: flex;
+                }
+                .user {
+                    justify-content: flex-end;
+                    font-size: .7em;
+                    height: 0;
+                    color: #888;
+                    text-align: left;
+                }
+                .msg-data {
+                    display: inline-block;
+                    word-wrap: break-word; 
+                }
+            }
+            .mine {
+                margin-left: 20%;
+                background-color: rgb(24, 164, 207);
+                .user {display:none;}
+            }
+        }
+        .inputs {
+            flex: 0 0 auto;
+            #msg-input {
+                width: 85%;
+                padding-left: 1em;
+                border-width: 1px 0 0 0;
+                background-color: #eee;
+            }
+            #msg-btn {
+                width: 15%;
+                border: 1px solid #aaa;
+                background-color: #dadada;
+            }
+            #msg-btn:hover {
+                background-color: #d0d0d0;
+            }
+        }
     }
 }
 
@@ -48,6 +113,14 @@
         .content {
             left: 0;
             right: 0;
+        }
+    }
+    #chat-wrapper {
+        .card-body {
+            flex-direction: column-reverse;
+            .messages{
+                flex-direction: column-reverse;
+            }
         }
     }
 }

@@ -30,7 +30,7 @@ class RoomsController extends Controller
         $room = Room::find($data['id']);
         if(!$room)
             return redirect('/');
-        return view('room');
+        return view('room')->with('roomID', $id);
     }
 
 

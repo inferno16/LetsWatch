@@ -42,6 +42,10 @@ module.exports = (function(){
         ws.send('video: '+url);
     }
 
+    function sendChatMessage(msg) {
+        ws.send('chat: '+msg);
+    }
+
     return {
         connect: connect,
         getWS: getWS,
@@ -51,6 +55,7 @@ module.exports = (function(){
         sendSeekingRequest: sendSeekingRequest,
         sendSeekRequest: sendSeekRequest,
         sendSyncRequest: sendSyncRequest,
-        sendMediaRequest: sendMediaRequest
+        sendMediaRequest: sendMediaRequest,
+        sendChatMessage: sendChatMessage
     }
 })();
