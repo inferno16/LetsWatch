@@ -19359,7 +19359,7 @@ module.exports = function () {
             return;
         }
         chat.card = chatWrapper.getElementsByClassName('card')[0];
-        player = document.getElementById('player');
+        player = document.getElementById('player').parentNode;
         ResizeChat();
         Listeners('add');
         init = true;
@@ -19404,7 +19404,8 @@ module.exports = function () {
 
     function ResizeChat() {
         if (player) {
-            chat.card.style.height = player.clientHeight + 'px';
+            chat.card.style.height = ''; // This fixes a bug when resizing down
+            chat.card.style.height = Math.floor(player.clientHeight) + 'px';
             ScrollContent();
         }
     }
@@ -19507,7 +19508,7 @@ module.exports = function () {
     }
 
     function sendMediaRequest(url) {
-        ws.send('video: ' + url);
+        ws.send('media: ' + url);
     }
 
     function sendChatMessage(msg) {
@@ -19560,6 +19561,13 @@ module.exports = function () {
             matches[3] = matches[3].toLowerCase(); // site name
             matches[4] = matches[4].toLowerCase(); // site TLD
             switch (matches[3]) {
+                case 'youtu':
+                    if (matches[4] !== 'be') {
+                        break;
+                    }
+                    matches[3] = 'youtube';
+                    matches[4] = 'com';
+                    matches[5] = 'watch?v=' + matches[5];
                 case 'youtube':
                     if (matches[4] === 'com' && matches[5].match(/^watch\?v=[A-Za-z0-9_\-]{11}$/i)) {
                         InitPlatform(matches[3], LWxYT);
@@ -19606,9 +19614,10 @@ module.exports = function () {
         if (!ws) {
             ws = uWS.connect('ws://109.104.194.40:3000/' + roomID);
         }
+        ws.addEventListener('message', MessageHandler);
         var url_input = document.getElementById('media-url');
         var load_btn = document.getElementById('load-btn');
-        FormAction(url_input, load_btn, NewVideo);
+        FormAction(url_input, load_btn, RequstNewVideo);
 
         LW_Chat.InitChat(ws, document.getElementById('chat-wrapper'));
     }
@@ -19624,6 +19633,19 @@ module.exports = function () {
             return true;
         }
         return false;
+    }
+
+    function RequstNewVideo(url) {
+        if (!ws) {
+            return;
+        }
+        uWS.sendMediaRequest(url);
+    }
+
+    function MessageHandler(e) {
+        if (e.data.match(/^media: /)) {
+            NewVideo(e.data.substring(7, e.data.length));
+        }
     }
 
     return {
@@ -19742,9 +19764,7 @@ module.exports = function () {
 
     function MessageHandler(e) {
         request = true;
-        if (e.data.match(/^video: /i)) {
-            NewVideo(e.data.substring(7, e.data.length));
-        } else if (e.data.match(/^player: /i)) {
+        if (e.data.match(/^player: /i)) {
             var cmd = e.data.indexOf('(') === -1 ? e.data : e.data.substring(0, e.data.indexOf('('));
             switch (cmd) {
                 case "player: play":
@@ -19939,9 +19959,13 @@ module.exports = function () {
     function NewVideo(url) {
         url = url.indexOf('&') !== -1 ? url.substring(0, url.indexOf('&')) : url;
         url.trim();
-        var regex = /^(https?:\/\/)?(www\.)?youtube\.\w{2,3}\/watch\?v=(.+)$/;
-        var matches;
-        if ((matches = regex.exec(url)).length === 4) {
+        var regex = /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=(.+)$/;
+        var matches = regex.exec(url);
+        if (!matches) {
+            regex = /^(https?:\/\/)?(www\.)?youtu\.be\/(.+)$/;
+            matches = regex.exec(url);
+        }
+        if (matches.length === 4) {
             if (player !== undefined) {
                 player.destroy();
                 player = undefined;
@@ -20001,9 +20025,7 @@ module.exports = function () {
         var prevState = statusListener;
         statusListener = sl;
         sync.statusRequest = true;
-        if (e.data.match(/^video: /i)) {
-            NewVideo(e.data.substring(7, e.data.length));
-        } else if (e.data.match(/^player: /i)) {
+        if (e.data.match(/^player: /i)) {
             var cmd = e.data.indexOf('(') === -1 ? e.data : e.data.substring(0, e.data.indexOf('('));
             switch (cmd) {
                 case "player: play":

@@ -21,7 +21,7 @@ module.exports = (function(){
             return;
         }
         chat.card = chatWrapper.getElementsByClassName('card')[0];
-        player = document.getElementById('player');
+        player = document.getElementById('player').parentNode;
         ResizeChat();
         Listeners('add');
         init = true;
@@ -64,7 +64,8 @@ module.exports = (function(){
 
     function ResizeChat() {
         if(player) {
-            chat.card.style.height = player.clientHeight+'px';
+            chat.card.style.height = ''; // This fixes a bug when resizing down
+            chat.card.style.height = Math.floor(player.clientHeight)+'px';
             ScrollContent();
         }
     }

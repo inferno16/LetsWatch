@@ -33,9 +33,13 @@ module.exports = (function(){
     function NewVideo(url) {
         url = (url.indexOf('&') !== -1) ? url.substring(0, url.indexOf('&')) : url;
         url.trim()
-        var regex = /^(https?:\/\/)?(www\.)?youtube\.\w{2,3}\/watch\?v=(.+)$/;
-        var matches;
-        if((matches = regex.exec(url)).length === 4) {
+        var regex = /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=(.+)$/;
+        var matches = regex.exec(url);
+        if(!matches) {
+            regex = /^(https?:\/\/)?(www\.)?youtu\.be\/(.+)$/
+            matches = regex.exec(url);
+        }
+        if(matches.length === 4) {
             if(player !== undefined) {
                 player.destroy();
                 player = undefined;
@@ -89,10 +93,7 @@ module.exports = (function(){
         var prevState = statusListener;
         statusListener = sl;
         sync.statusRequest = true;
-        if(e.data.match(/^video: /i)) {
-            NewVideo(e.data.substring(7, e.data.length));
-        }
-        else if(e.data.match(/^player: /i)) {
+        if(e.data.match(/^player: /i)) {
             var cmd = (e.data.indexOf('(') === -1) ? e.data : e.data.substring(0, e.data.indexOf('('));
             switch(cmd) {
                 case "player: play":

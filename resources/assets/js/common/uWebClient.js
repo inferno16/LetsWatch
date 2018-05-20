@@ -39,7 +39,7 @@ module.exports = (function(){
     }
 
     function sendMediaRequest(url) {
-        ws.send('video: '+url);
+        ws.send('media: '+url);
     }
 
     function sendChatMessage(msg) {

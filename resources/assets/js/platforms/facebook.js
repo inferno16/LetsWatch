@@ -101,10 +101,7 @@ module.exports = (function(){
 
     function MessageHandler(e) {
         request = true;
-        if(e.data.match(/^video: /i)) {
-            NewVideo(e.data.substring(7, e.data.length));
-        }
-        else if (e.data.match(/^player: /i)) {
+        if (e.data.match(/^player: /i)) {
             var cmd = (e.data.indexOf('(') === -1) ? e.data : e.data.substring(0, e.data.indexOf('('));
             switch (cmd) {
                 case "player: play":

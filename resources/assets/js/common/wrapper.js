@@ -25,6 +25,11 @@ module.exports = (function(){
             matches[3] = matches[3].toLowerCase(); // site name
             matches[4] = matches[4].toLowerCase(); // site TLD
             switch(matches[3]) {
+                case 'youtu':
+                    if(matches[4] !== 'be') {break;}
+                    matches[3] = 'youtube';
+                    matches[4] = 'com';
+                    matches[5] = 'watch?v='+matches[5];
                 case 'youtube':
                     if(matches[4] === 'com' && matches[5].match(/^watch\?v=[A-Za-z0-9_\-]{11}$/i)) {
                         InitPlatform(matches[3], LWxYT);
@@ -74,9 +79,10 @@ module.exports = (function(){
         if(!ws) {
            ws = uWS.connect('ws://109.104.194.40:3000/'+roomID);
         }
+        ws.addEventListener('message', MessageHandler);
         var url_input = document.getElementById('media-url');
         var load_btn = document.getElementById('load-btn');
-        FormAction(url_input, load_btn, NewVideo);
+        FormAction(url_input, load_btn, RequstNewVideo);
         
         LW_Chat.InitChat(ws, document.getElementById('chat-wrapper'));
     }
@@ -92,6 +98,17 @@ module.exports = (function(){
             return true;
         }
         return false;
+    }
+
+    function RequstNewVideo(url) {
+        if(!ws) { return; }
+        uWS.sendMediaRequest(url);
+    }
+
+    function MessageHandler(e) {
+        if(e.data.match(/^media: /)) {
+            NewVideo(e.data.substring(7, e.data.length));
+        }
     }
 
     return {
