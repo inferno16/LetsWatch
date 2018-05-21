@@ -19404,7 +19404,7 @@ module.exports = function () {
 
     function ResizeChat() {
         if (player) {
-            chat.card.style.height = ''; // This fixes a bug when resizing down
+            chat.card.style.height = '0'; // This fixes a bug when resizing down
             chat.card.style.height = Math.floor(player.clientHeight) + 'px';
             ScrollContent();
         }
@@ -19432,9 +19432,19 @@ module.exports = function () {
     function ScrollContent() {
         var style = window.getComputedStyle(chat.messages);
         if (style.hasOwnProperty('flexDirection') && style.flexDirection === 'column-reverse') {
-            chat.messages.scrollTo(0, 0);
+            ScrollYWrapper(chat.messages, 0);
         } else {
-            chat.messages.scrollTo(0, chat.messages.scrollHeight);
+            ScrollYWrapper(chat.messages, chat.messages.scrollHeight);
+        }
+    }
+
+    function ScrollYWrapper(element, amount) {
+        if (element.hasOwnProperty('scrollTo')) {
+            // Normal browsers
+            element.scrollTo(0, amount);
+        } else {
+            // IE and Edge
+            element.scrollTop = amount;
         }
     }
 
@@ -19531,6 +19541,139 @@ module.exports = function () {
 
 /***/ }),
 
+/***/ "./resources/assets/js/common/users.js":
+/***/ (function(module, exports) {
+
+module.exports = function () {
+    var ws;
+    var users = [];
+    var nav;
+    var timer;
+    var synced = false;
+    var timerInterval = 20;
+    var scrollSpeed = 10;
+    function User() {
+        this.Name;
+        this.Avatar;
+        this.ID;
+        this.Element;
+    }
+    function Navigation() {
+        this.PrevButton;
+        this.NextButton;
+        this.UserContainer;
+    }
+    Navigation.prototype.CheckData = function () {
+        return this.PrevButton && this.NextButton && this.UserContainer;
+    };
+
+    function InitUsers(uWebSocketConnection) {
+        if (synced) {
+            return;
+        }
+        ws = uWebSocketConnection;
+        ws.addEventListener('message', MessageHandler);
+        nav = new Navigation();
+        var wrapper = document.getElementById('room-users');
+        if (!wrapper) {
+            return;
+        }
+        nav.UserContainer = wrapper.getElementsByClassName('users')[0];
+        nav.PrevButton = wrapper.getElementsByClassName('prev-btn')[0];
+        nav.NextButton = wrapper.getElementsByClassName('next-btn')[0];
+        if (!nav.CheckData()) {
+            return;
+        }
+        Listeners('add');
+        synced = true;
+    }
+
+    function DeInitUsers() {
+        if (!synced) {
+            return;
+        }
+        Listeners('remove');
+        synced = false;
+    }
+
+    function Listeners(option) {
+        ws[option + 'EventListener']('message', MessageHandler);
+        nav.PrevButton[option + 'EventListener']('mousedown', ScrollBack);
+        nav.NextButton[option + 'EventListener']('mousedown', ScrollForward);
+        document.body[option + 'EventListener']('mouseup', ScrollReset);
+    }
+
+    function MessageHandler(e) {
+        if (e.data.match(/^user_connected: (.+)$/)) {
+            AddUser(e.data.substring(16, e.data.length));
+        } else if (e.data.match(/^user_dissconnected: (.+)$/)) {
+            RemoveUser(e.data.substring(20, e.data.length));
+        }
+    }
+
+    function ScrollForward() {
+        timer = setInterval(function () {
+            ScrollXWrapper(nav.UserContainer, nav.UserContainer.scrollLeft + scrollSpeed);
+        }, timerInterval);
+    }
+
+    function ScrollBack() {
+        timer = setInterval(function () {
+            ScrollXWrapper(nav.UserContainer, nav.UserContainer.scrollLeft - scrollSpeed);
+        }, timerInterval);
+    }
+
+    function ScrollXWrapper(element, amount) {
+        if (element.hasOwnProperty('scrollTo')) {
+            // Normal browsers
+            element.scrollTo(amount, 0);
+        } else {
+            // IE and Edge
+            if (amount > element.scrollWidth - element.clientWidth) {
+                element.scrollLeft = element.scrollWidth - element.clientWidth;
+            } else if (amount < 0) {
+                element.scrollLeft = 0;
+            } else {
+                element.scrollLeft = amount;
+            }
+        }
+    }
+
+    function SetScrollSpeed(speed) {
+        if (Number.parseInt(speed)) {
+            scrollSpeed = speed;
+        }
+    }
+
+    function ScrollReset() {
+        if (timer) {
+            clearInterval(timer);
+        }
+    }
+
+    function AddUser(name) {}
+
+    function RemoveUser(name) {
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].Name === name) {
+                users[i].Element.parentNode.removeChild(users[i].Element);
+                users.slice(i, 1);
+                break;
+            }
+        }
+    }
+
+    return {
+        IsSynced: synced,
+        InitUsers: InitUsers,
+        DeInitUsers: DeInitUsers,
+        SetScrollSpeed: SetScrollSpeed,
+        ScrollSpeed: scrollSpeed
+    };
+}();
+
+/***/ }),
+
 /***/ "./resources/assets/js/common/wrapper.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19539,6 +19682,9 @@ window.uWS = __webpack_require__("./resources/assets/js/common/uWebClient.js");
 
 // Chat
 window.LW_Chat = __webpack_require__("./resources/assets/js/common/chat.js");
+
+// Users
+window.LW_Users = __webpack_require__("./resources/assets/js/common/users.js");
 
 // Patform scripts 
 window.LWxYT = __webpack_require__("./resources/assets/js/platforms/youtube.js");
@@ -19612,14 +19758,38 @@ module.exports = function () {
 
     function CreateEventHandlers(roomID) {
         if (!ws) {
+            // Initialize the WebSocket
             ws = uWS.connect('ws://109.104.194.40:3000/' + roomID);
         }
+
         ws.addEventListener('message', MessageHandler);
+
+        // Media url input
         var url_input = document.getElementById('media-url');
         var load_btn = document.getElementById('load-btn');
         FormAction(url_input, load_btn, RequstNewVideo);
 
+        // Media url input toggle on low res
+        var toggle_search = document.getElementById('room-users').getElementsByClassName('toggle-form')[0];
+        var media_form = document.getElementById('room-users').getElementsByClassName('media-form')[0];
+        var user_list = document.getElementById('room-users').getElementsByClassName('user-list')[0];
+        if (toggle_search && media_form && user_list) {
+            toggle_search.addEventListener('click', function () {
+                if (media_form.style.display && media_form.style.display === 'block') {
+                    media_form.style.display = user_list.style.display = '';
+                } else {
+                    media_form.style.display = 'block';
+                    user_list.style.display = 'none';
+                }
+            });
+        }
+
+        // Initializing components...
+
+        // Chat
         LW_Chat.InitChat(ws, document.getElementById('chat-wrapper'));
+        // Users
+        LW_Users.InitUsers(ws);
     }
 
     function FormAction(input, button, func) {

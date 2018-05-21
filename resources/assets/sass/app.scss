@@ -18,6 +18,103 @@
 #room-users {
     margin-bottom: 5px;
     height: 50px;
+    .search-wrapper{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0 .5em 0 .5em;
+        .toggle-form {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            top: 50%;
+            margin-top: -20px;
+            float: left;
+            display: none;
+            line-height: 40px;
+            margin-right: 1em;
+            cursor: pointer;
+        }
+        .media-form{
+            height: 30px;
+            float: left;
+            width: 35%;
+            position: relative;
+            top: 50%;
+            margin-top: -15px;
+            * {
+                height: 100%;
+            }
+            #media-url {
+                padding: 0;
+                padding-left: .5em;
+                padding-right: 35px;
+                border-radius: .5em;
+                vertical-align: top;
+                width: 100%;
+                border: 1px solid #bbb;
+            }
+            #load-btn {
+                width: 35px;
+                margin-left: -35px;
+                vertical-align: top;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+        }
+        .user-list {
+            border: 0;
+            float: left;
+            height: 100%;
+            margin-left: 1%;
+            width: 64%;
+            background: rgb(240, 240, 250);
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            border-radius: .5em;
+            .users {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                overflow: hidden;
+                flex: 1 1 auto;
+                margin: 0 .25em 0 .25em;
+                .user-card {
+                    flex: 0 0 auto;
+                    height: 48px;
+                    width: 50px;
+                    margin: 0 .25em 0 .25em;
+                    border: 1px solid red;
+                }
+            }
+            .prev-btn, .next-btn {
+                height: 50px - 2px;
+                width: 15px;
+                line-height: 50px - 2px;
+                flex: 0 0 auto;
+            }
+        }
+    }
+}
+
+.lw-btn {
+    display: inline-block;
+    height: 30px;
+    border: 1px solid #bbb;
+    padding: 0;
+    text-align: center;
+    line-height: 30px;
+    background: #eee;
+    border-radius: .5em;
+    cursor: default;
+    user-select: none;
+}
+
+.lw-btn:hover {
+    background: #ddd;
 }
 
 #player-wrapper {
@@ -53,7 +150,7 @@
         .messages {
             padding: 1em;
             overflow-y: scroll;
-            flex: 1 1 auto;
+            flex: 1 1 0; // The 0 fixes a problem in non webkit browsers
             align-content: flex-start;
             flex-direction: column;
             flex-wrap: nowrap;
@@ -108,6 +205,11 @@
 }
 
 @include media-breakpoint-down(md) {
+    #room-users{ 
+        .media-form {
+            width: 40%;
+        }
+    }
     #player-wrapper, #chat-wrapper {
         padding: 0;
         .content {
@@ -120,6 +222,32 @@
             flex-direction: column-reverse;
             .messages{
                 flex-direction: column-reverse;
+            }
+        }
+    }
+}
+
+@include media-breakpoint-down(xs) {
+    #room-users {
+        .search-wrapper {
+            .toggle-form {
+                display: block; // WTF?!
+            }
+            .media-form {
+                position: absolute;
+                left: 15%;
+                left: calc(1em + 40px);
+                width: 85%;
+                width: calc(100% - calc(1.5em + 40px));
+                display: none;
+            }
+            .user-list {
+                margin-left: 0;
+                position: absolute;
+                left: 15%;
+                left: calc(1em + 40px);
+                width: 85%;
+                width: calc(100% - calc(1.5em + 40px));
             }
         }
     }

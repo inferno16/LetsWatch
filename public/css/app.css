@@ -10420,6 +10420,135 @@ a.text-dark:focus {
   height: 50px;
 }
 
+#room-users .search-wrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 .5em 0 .5em;
+}
+
+#room-users .search-wrapper .toggle-form {
+  width: 40px;
+  height: 40px;
+  position: relative;
+  top: 50%;
+  margin-top: -20px;
+  float: left;
+  display: none;
+  line-height: 40px;
+  margin-right: 1em;
+  cursor: pointer;
+}
+
+#room-users .search-wrapper .media-form {
+  height: 30px;
+  float: left;
+  width: 35%;
+  position: relative;
+  top: 50%;
+  margin-top: -15px;
+}
+
+#room-users .search-wrapper .media-form * {
+  height: 100%;
+}
+
+#room-users .search-wrapper .media-form #media-url {
+  padding: 0;
+  padding-left: .5em;
+  padding-right: 35px;
+  border-radius: .5em;
+  vertical-align: top;
+  width: 100%;
+  border: 1px solid #bbb;
+}
+
+#room-users .search-wrapper .media-form #load-btn {
+  width: 35px;
+  margin-left: -35px;
+  vertical-align: top;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+#room-users .search-wrapper .user-list {
+  border: 0;
+  float: left;
+  height: 100%;
+  margin-left: 1%;
+  width: 64%;
+  background: #f0f0fa;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  border-radius: .5em;
+}
+
+#room-users .search-wrapper .user-list .users {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+  overflow: hidden;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  margin: 0 .25em 0 .25em;
+}
+
+#room-users .search-wrapper .user-list .users .user-card {
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+  height: 48px;
+  width: 50px;
+  margin: 0 .25em 0 .25em;
+  border: 1px solid red;
+}
+
+#room-users .search-wrapper .user-list .prev-btn,
+#room-users .search-wrapper .user-list .next-btn {
+  height: 48px;
+  width: 15px;
+  line-height: 48px;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
+}
+
+.lw-btn {
+  display: inline-block;
+  height: 30px;
+  border: 1px solid #bbb;
+  padding: 0;
+  text-align: center;
+  line-height: 30px;
+  background: #eee;
+  border-radius: .5em;
+  cursor: default;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.lw-btn:hover {
+  background: #ddd;
+}
+
 #player-wrapper {
   position: relative;
   padding: 0 5px 0 0;
@@ -10487,8 +10616,8 @@ a.text-dark:focus {
   padding: 1em;
   overflow-y: scroll;
   -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+      -ms-flex: 1 1 0px;
+          flex: 1 1 0;
   -ms-flex-line-pack: start;
       align-content: flex-start;
   -webkit-box-orient: vertical;
@@ -10571,6 +10700,10 @@ a.text-dark:focus {
 }
 
 @media (max-width: 991.98px) {
+  #room-users .media-form {
+    width: 40%;
+  }
+
   #player-wrapper,
   #chat-wrapper {
     padding: 0;
@@ -10594,6 +10727,30 @@ a.text-dark:focus {
     -webkit-box-direction: reverse;
         -ms-flex-direction: column-reverse;
             flex-direction: column-reverse;
+  }
+}
+
+@media (max-width: 575.98px) {
+  #room-users .search-wrapper .toggle-form {
+    display: block;
+  }
+
+  #room-users .search-wrapper .media-form {
+    position: absolute;
+    left: 15%;
+    left: calc(1em + 40px);
+    width: 85%;
+    width: calc(100% - calc(1.5em + 40px));
+    display: none;
+  }
+
+  #room-users .search-wrapper .user-list {
+    margin-left: 0;
+    position: absolute;
+    left: 15%;
+    left: calc(1em + 40px);
+    width: 85%;
+    width: calc(100% - calc(1.5em + 40px));
   }
 }
 

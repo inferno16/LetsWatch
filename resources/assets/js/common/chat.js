@@ -64,7 +64,7 @@ module.exports = (function(){
 
     function ResizeChat() {
         if(player) {
-            chat.card.style.height = ''; // This fixes a bug when resizing down
+            chat.card.style.height = '0'; // This fixes a bug when resizing down
             chat.card.style.height = Math.floor(player.clientHeight)+'px';
             ScrollContent();
         }
@@ -90,10 +90,18 @@ module.exports = (function(){
     function ScrollContent() {
         var style = window.getComputedStyle(chat.messages);
         if(style.hasOwnProperty('flexDirection') && style.flexDirection === 'column-reverse') {
-            chat.messages.scrollTo(0, 0);
+            ScrollYWrapper(chat.messages, 0);
         }
         else{
-            chat.messages.scrollTo(0, chat.messages.scrollHeight);
+            ScrollYWrapper(chat.messages, chat.messages.scrollHeight);
+        }
+    }
+
+    function ScrollYWrapper(element, amount) {
+        if(element.hasOwnProperty('scrollTo')) { // Normal browsers
+            element.scrollTo(0, amount);
+        } else { // IE and Edge
+            element.scrollTop = amount;
         }
     }
 
