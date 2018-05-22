@@ -2,7 +2,7 @@ module.exports = (function(){
     var ws;
     var users = [];
     var nav;
-    var timer;
+    var timer = 0;
     var synced = false;
     var timerInterval = 20;
     var scrollSpeed = 10;
@@ -59,12 +59,14 @@ module.exports = (function(){
     }
 
     function ScrollForward() {
+        ScrollReset(); // In case the previous timer was not cleared
         timer = setInterval(function() {
             ScrollXWrapper(nav.UserContainer, nav.UserContainer.scrollLeft + scrollSpeed);
         }, timerInterval);
     }
 
     function ScrollBack() {
+        ScrollReset(); // In case the previous timer was not cleared
         timer = setInterval(function() {
             ScrollXWrapper(nav.UserContainer, nav.UserContainer.scrollLeft - scrollSpeed);
         }, timerInterval);
@@ -95,18 +97,44 @@ module.exports = (function(){
     function ScrollReset() {
         if(timer) {
             clearInterval(timer);
+            timer = 0;
         } 
     }
 
     function AddUser(name) {
-        
+        // Creating new User object
+        var user = new User();
+        user.Name = name;
+        user.Avatar = '/storage/images/default.jpg'; // For testing purposes
+        // Creating the DOM elements
+        var card = document.createElement('div');
+        var holder = document.createElement('div');
+        var avatar = document.createElement('img');
+        var username = document.createElement('span');
+        // Setting the attributes of the elements
+        card.setAttribute('class', 'user-card');
+        holder.setAttribute('class', 'avatar-holder');
+        avatar.setAttribute('class', 'user-avatar');
+        avatar.setAttribute('src', user.Avatar);
+        avatar.setAttribute('title', user.Name);
+        username.setAttribute('class', 'user-name');
+        username.setAttribute('title', user.Name);
+        username.innerText = user.Name;
+        // Creating the structure and add to the DOM
+        holder.appendChild(avatar);
+        card.appendChild(holder);
+        card.appendChild(username);
+        nav.UserContainer.appendChild(card);
+        // Save the user with a reference to the user-card for easier deletion
+        user.Element = card;
+        users.push(user);
     }
 
     function RemoveUser(name) {
         for (let i = 0; i < users.length; i++) {
             if(users[i].Name === name) {
                 users[i].Element.parentNode.removeChild(users[i].Element);
-                users.slice(i, 1);
+                users.splice(i, 1);
                 break;
             }
         }

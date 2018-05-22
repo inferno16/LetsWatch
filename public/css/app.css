@@ -10420,7 +10420,7 @@ a.text-dark:focus {
   height: 50px;
 }
 
-#room-users .search-wrapper {
+#room-users .wrapper {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -10429,7 +10429,7 @@ a.text-dark:focus {
   padding: 0 .5em 0 .5em;
 }
 
-#room-users .search-wrapper .toggle-form {
+#room-users .wrapper .toggle-form {
   width: 40px;
   height: 40px;
   position: relative;
@@ -10442,7 +10442,7 @@ a.text-dark:focus {
   cursor: pointer;
 }
 
-#room-users .search-wrapper .media-form {
+#room-users .wrapper .media-form {
   height: 30px;
   float: left;
   width: 35%;
@@ -10451,11 +10451,11 @@ a.text-dark:focus {
   margin-top: -15px;
 }
 
-#room-users .search-wrapper .media-form * {
+#room-users .wrapper .media-form * {
   height: 100%;
 }
 
-#room-users .search-wrapper .media-form #media-url {
+#room-users .wrapper .media-form #media-url {
   padding: 0;
   padding-left: .5em;
   padding-right: 35px;
@@ -10465,7 +10465,7 @@ a.text-dark:focus {
   border: 1px solid #bbb;
 }
 
-#room-users .search-wrapper .media-form #load-btn {
+#room-users .wrapper .media-form #load-btn {
   width: 35px;
   margin-left: -35px;
   vertical-align: top;
@@ -10473,7 +10473,7 @@ a.text-dark:focus {
   border-bottom-left-radius: 0;
 }
 
-#room-users .search-wrapper .user-list {
+#room-users .wrapper .user-list {
   border: 0;
   float: left;
   height: 100%;
@@ -10492,7 +10492,7 @@ a.text-dark:focus {
   border-radius: .5em;
 }
 
-#room-users .search-wrapper .user-list .users {
+#room-users .wrapper .user-list .users {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -10506,21 +10506,59 @@ a.text-dark:focus {
   -webkit-box-flex: 1;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
-  margin: 0 .25em 0 .25em;
 }
 
-#room-users .search-wrapper .user-list .users .user-card {
+#room-users .wrapper .user-list .users .user-card {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
   height: 48px;
   width: 50px;
-  margin: 0 .25em 0 .25em;
-  border: 1px solid red;
+  margin: 0 10px 0 10px;
 }
 
-#room-users .search-wrapper .user-list .prev-btn,
-#room-users .search-wrapper .user-list .next-btn {
+#room-users .wrapper .user-list .users .user-card .avatar-holder {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 25px;
+}
+
+#room-users .wrapper .user-list .users .user-card .avatar-holder .user-avatar {
+  max-width: 50px;
+  max-height: 50px;
+  height: auto;
+  width: auto;
+  margin: 0 auto;
+  margin-top: -5px;
+}
+
+#room-users .wrapper .user-list .users .user-card .me {
+  border: 1px solid #006600;
+}
+
+#room-users .wrapper .user-list .users .user-card .user-name {
+  position: relative;
+  display: block;
+  margin-top: -15px;
+  margin-left: -5px;
+  z-index: 999;
+  text-align: center;
+  background: #00CC00;
+  border: 1px solid #004400;
+  overflow: hidden;
+  color: #eee;
+  height: 15px;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 10px 10px 0 0;
+  font-family: Arial;
+  width: 60px;
+  cursor: default;
+}
+
+#room-users .wrapper .user-list .prev-btn,
+#room-users .wrapper .user-list .next-btn {
   height: 48px;
   width: 15px;
   line-height: 48px;
@@ -10680,17 +10718,24 @@ a.text-dark:focus {
   -webkit-box-flex: 0;
       -ms-flex: 0 0 auto;
           flex: 0 0 auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 #chat-wrapper .card-body .inputs #msg-input {
-  width: 85%;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
   padding-left: 1em;
   border-width: 1px 0 0 0;
   background-color: #eee;
 }
 
 #chat-wrapper .card-body .inputs #msg-btn {
-  width: 15%;
+  -webkit-box-flex: 0;
+      -ms-flex: 0 0 auto;
+          flex: 0 0 auto;
   border: 1px solid #aaa;
   background-color: #dadada;
 }
@@ -10731,11 +10776,11 @@ a.text-dark:focus {
 }
 
 @media (max-width: 575.98px) {
-  #room-users .search-wrapper .toggle-form {
+  #room-users .wrapper .toggle-form {
     display: block;
   }
 
-  #room-users .search-wrapper .media-form {
+  #room-users .wrapper .media-form {
     position: absolute;
     left: 15%;
     left: calc(1em + 40px);
@@ -10744,7 +10789,7 @@ a.text-dark:focus {
     display: none;
   }
 
-  #room-users .search-wrapper .user-list {
+  #room-users .wrapper .user-list {
     margin-left: 0;
     position: absolute;
     left: 15%;
