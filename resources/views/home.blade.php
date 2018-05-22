@@ -3,6 +3,6 @@
 @section('content')
 <form action="/room" method="POST">
 @csrf
-<input type="submit" name="submit" value="Create Room">
+<input type="submit" name="submit" value="{{ __('Create Room') }}">
 </form>
 @endsection
