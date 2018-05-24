@@ -10,7 +10,6 @@ class RoomsController extends Controller
 {
     public function create(Request $request) {
         $room = new Room;
-        $room->name = 'Temporary room';
         $user_id = auth()->id();
         if($user_id) {
             $room->guest_owner = 0;
@@ -19,41 +18,24 @@ class RoomsController extends Controller
         else {
             $room->guest_owner = 1;
         }
-        $room->save();
-        $data = $this->encodeID($room->id);
-        return redirect('/room/'.$data['id']);
+        $stream_key = '';
+        $room_found = 0;
+        do {
+            // Generating unique room identifier
+            $stream_key = Base64Url::generate(16);
+            $room_found = Room::find($stream_key);
+        } while($room_found);
+        $room->stream_key = $stream_key;
+        if($room->save())
+            return redirect('/room/'.$room->stream_key);
+        else
+            return redirect('/')->with('errors', 'An unexpected error occured while creating the room.');
     }
+
     public function join($id) {
-        $data = $this->getRoomIdFromUri($id);
-        if(!$data)
-            return redirect('/');
-        $room = Room::find($data['id']);
+        $room = Room::where('stream_key', $id)->first();
         if(!$room)
             return redirect('/');
         return view('room')->with('roomID', $id);
-    }
-
-
-    // The code below is a temporary solution
-
-    private function encodeID($id) {
-        $idb64 = Base64Url::encode($id);
-        $token = Base64Url::generate(6);
-        $uri = Base64Url::encode($token.$idb64.'c'.strlen($idb64));
-        return ['token'=>$token, 'id'=>$uri];
-    }
-
-    private function getRoomIdFromUri($uri) {
-        $str = Base64Url::decode($uri);
-        $data;
-        if(!preg_match("/^([A-Za-z0-9_\-]+)c(\d+)$/", $str, $data))
-            return 0;
-        if(count($data) !== 3)
-            return 0;
-        $token = substr($data[1], 0, -$data[2]);
-        $id = Base64Url::decode(substr($data[1], -$data[2]));
-        if(!ctype_digit($id))
-            return 0;
-        return ['token'=>$token, 'id'=>$id];
     }
 }

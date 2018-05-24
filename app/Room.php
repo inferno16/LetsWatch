@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
-    public $timestamps = false;
     /**
      * The the users inside the room
      */

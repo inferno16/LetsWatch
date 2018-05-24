@@ -15,8 +15,8 @@ class CreateRoomUserTable extends Migration
     {
         Schema::create('room_user', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('room_id');
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('room_id');
         });
     }
 

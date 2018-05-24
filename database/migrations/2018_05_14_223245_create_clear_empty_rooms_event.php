@@ -27,6 +27,7 @@ class CreateClearEmptyRoomsEvent extends Migration
      */
     public function down()
     {
+        DB::unprepared('SET @@global.event_scheduler = 0;'); // Disabling the event scheduler thread
         DB::unprepared('DROP EVENT IF EXISTS `clean_empty_rooms`');
     }
 }

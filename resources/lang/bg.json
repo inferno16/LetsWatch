@@ -12,5 +12,6 @@
     "Create Room": "Създай стая",
     "Chatbox for room": "Чат на стая",
     "Send": "Изпрати",
-    "Paste video URL here": "Постави видео линк тук"
+    "Paste video URL here": "Постави видео линк тук",
+    "An unexpected error occured while creating the room.": "Възникна неочаквана грешка при създаването на стаята."
 }

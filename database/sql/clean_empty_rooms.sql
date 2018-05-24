@@ -4,13 +4,19 @@ ON SCHEDULE
 	STARTS (TIMESTAMP(CURRENT_DATE) + INTERVAL 2 HOUR)
 	ON COMPLETION PRESERVE
 DO BEGIN
-	#delete empty guest rooms
-	DELETE FROM rooms WHERE guest_owner = TRUE AND id NOT IN (
-		SELECT DISTINCT r.id FROM (SELECT * FROM rooms) AS r 
-			JOIN room_user ON r.id = room_user.room_id
-			JOIN users ON room_user.user_id = users.id
-		WHERE r.guest_owner = TRUE
+	# Delete rooms inactive from 2 days or more
+	DELETE FROM rooms WHERE DATEDIFF(CURDATE(), updated_at) > 1;
+
+	# Delete entries form the pivot table that are not part of an existing room
+	DELETE FROM room_user WHERE id NOT IN (
+		SELECT ru.id FROM (SELECT * FROM room_user) AS ru 
+			JOIN rooms ON rooms.id = ru.room_id
 	);
-	#delete rooms inactive for more than 1 day
-	DELETE FROM rooms WHERE DATEDIFF(CURDATE(), inactive_from) > 1;
+
+	# Delete entries form the pivot table that are part of an empty room
+	DELETE FROM room_user WHERE id IN (
+		SELECT ru.id FROM (SELECT * FROM room_user) AS ru 
+			JOIN rooms ON rooms.id = ru.room_id 
+		WHERE rooms.members = 0
+	);
 END;
