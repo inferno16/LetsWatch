@@ -19339,7 +19339,6 @@ module.exports = function () {
     var init = false;
     var chat;
     var player;
-    var last_message = ''; // For testing purposes
     function Chat() {
         this.messages;
         this.input;
@@ -19376,14 +19375,17 @@ module.exports = function () {
         window[option + 'EventListener']('resize', ResizeChat);
         chat.input[option + 'EventListener']('keydown', InputKeyDown);
         chat.button[option + 'EventListener']('click', SendMessage);
-        ws[option + 'EventListener']('message', MessageReceived);
+        ws[option + 'EventListener']('message', MessageHandler);
     }
 
-    function MessageReceived(e) {
-        if (e.data.match(/^chat: /)) {
-            var message = e.data.substring(6, e.data.length);
-            ConstructMessage(message, 'User', message === last_message ? 'mine' : '');
-            last_message = '';
+    function MessageHandler(e) {
+        var msg;
+        if (msg = uWS.isValidObject(e.data, 'chat')) {
+            switch (msg.command) {
+                case 'message':
+                    ConstructMessage(msg.value, msg.user, msg.user === LW_Users.GetUsername() ? 'mine' : '');
+                    break;
+            }
         }
     }
 
@@ -19477,6 +19479,39 @@ This is a temporary solution
 
 module.exports = function () {
     var ws = undefined;
+    var _attr = {
+        obj: 'object',
+        cmd: 'command',
+        val: 'value',
+        usr: 'user'
+    };
+    var _obj = {
+        player: {
+            name: 'player',
+            cmds: ['play', 'pause', 'seek', 'seeking', 'buffering', 'sync'],
+            vals: { seek: 'number', sync: 'number' }
+        },
+        chat: {
+            name: 'chat',
+            cmds: ['message'],
+            vals: { message: 'string' }
+        },
+        user: {
+            name: 'user',
+            cmds: ['connection', 'disconnection', 'promotion', 'introduction'],
+            vals: { introduction: 'string' }
+        },
+        media: {
+            name: 'media',
+            cmds: ['new'],
+            vals: { new: 'string' }
+        },
+        conn: {
+            name: 'connection',
+            cmds: [],
+            vals: {}
+        }
+    };
 
     function connect() {
         var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'ws://109.104.194.40:3000/TEST';
@@ -19493,36 +19528,111 @@ module.exports = function () {
         return ws;
     }
 
+    function CreateObject(obj, cmd) {
+        var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+        var json = {};
+        json[_attr.obj] = obj;
+        json[_attr.cmd] = cmd;
+        json[_attr.usr] = LW_Users.GetUsername();
+        if (value) {
+            json[_attr.val] = value;
+        }
+        return JSON.stringify(json);
+    }
+
+    function CreatePlayerObject(cmd) {
+        var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        return CreateObject(_obj.player.name, cmd, value);
+    }
+
+    function CreateMediaObject(cmd) {
+        var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        return CreateObject(_obj.media.name, cmd, value);
+    }
+
+    function CreateChatObject(cmd) {
+        var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        return CreateObject(_obj.chat.name, cmd, value);
+    }
+
+    function CreateUserObject(cmd) {
+        var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        return CreateObject(_obj.user.name, cmd, value);
+    }
+
     function sendPlayRequest() {
-        ws.send('player: play');
+        ws.send(CreatePlayerObject('play'));
     }
 
     function sendPauseRequest() {
-        ws.send('player: pause');
+        ws.send(CreatePlayerObject('pause'));
     }
 
     function sendBufferingRequest() {
-        ws.send('player: buffering');
+        ws.send(CreatePlayerObject('buffering'));
     }
 
     function sendSeekingRequest() {
-        ws.send('player: seeking');
+        ws.send(CreatePlayerObject('seeking'));
     }
 
     function sendSeekRequest(second) {
-        ws.send('player: seek(' + second + ')');
+        ws.send(CreatePlayerObject('seek', second));
     }
 
     function sendSyncRequest(second) {
-        ws.send('player: sync(' + second + ')');
+        ws.send(CreatePlayerObject('sync', second));
     }
 
     function sendMediaRequest(url) {
-        ws.send('media: ' + url);
+        ws.send(CreateMediaObject('new', url));
     }
 
     function sendChatMessage(msg) {
-        ws.send('chat: ' + msg);
+        ws.send(CreateChatObject('message', msg));
+    }
+
+    function sendIntroduction(json_str, user) {
+        var obj = CreateUserObject('introduction', json_str);
+        obj = JSON.parse(obj);
+        obj.user = user;
+        ws.send(JSON.stringify(obj));
+    }
+
+    function isNumber(val) {
+        return val.match(/^[+-]?[0-9]+(\.[0-9]+)$/);
+    }
+
+    function isValidObject(data, objType) {
+        var jsObj;
+        try {
+            jsObj = JSON.parse(data);
+            if (jsObj.object != objType) {
+                return false;
+            }
+            for (var i = 0; i < _attr.length; i++) {
+                if (!(_attr[i] in jsObj)) {
+                    return false;
+                }
+            }
+            if (_obj[jsObj.object].cmds.indexOf(jsObj.command) === -1) {
+                return false;
+            }
+            if (jsObj.command in _obj[jsObj.object].vals) {
+                var val = _obj[jsObj.object].vals[jsObj.command];
+                if (val.trim() === '' || val === 'number' && !isNumber(val)) {
+                    return false;
+                }
+            }
+        } catch (error) {
+            return false;
+        }
+        return jsObj;
     }
 
     return {
@@ -19535,7 +19645,9 @@ module.exports = function () {
         sendSeekRequest: sendSeekRequest,
         sendSyncRequest: sendSyncRequest,
         sendMediaRequest: sendMediaRequest,
-        sendChatMessage: sendChatMessage
+        sendChatMessage: sendChatMessage,
+        sendIntroduction: sendIntroduction,
+        isValidObject: isValidObject
     };
 }();
 
@@ -19552,6 +19664,9 @@ module.exports = function () {
     var synced = false;
     var timerInterval = 20;
     var scrollSpeed = 10;
+    var my_username;
+    var owner = 0;
+    var introduced = 0;
     function User() {
         this.Name;
         this.Avatar;
@@ -19567,10 +19682,11 @@ module.exports = function () {
         return this.PrevButton && this.NextButton && this.UserContainer;
     };
 
-    function InitUsers(uWebSocketConnection) {
+    function InitUsers(uWebSocketConnection, username) {
         if (synced) {
             return;
         }
+        my_username = username;
         ws = uWebSocketConnection;
         ws.addEventListener('message', MessageHandler);
         nav = new Navigation();
@@ -19604,10 +19720,32 @@ module.exports = function () {
     }
 
     function MessageHandler(e) {
-        if (e.data.match(/^user_connected: (.+)$/)) {
-            AddUser(e.data.substring(16, e.data.length));
-        } else if (e.data.match(/^user_dissconnected: (.+)$/)) {
-            RemoveUser(e.data.substring(20, e.data.length));
+        var msg;
+        if (msg = uWS.isValidObject(e.data, 'user')) {
+            switch (msg.command) {
+                case 'connection':
+                    if (owner) {
+                        uWS.sendIntroduction(JSON.stringify(users), msg.user);
+                    }
+                    AddUser(msg.user);
+                    break;
+                case 'disconnection':
+                    RemoveUser(msg.user);
+                    break;
+                case 'promotion':
+                    introduced = 1;
+                    owner = 1;
+                    break;
+                case 'introduction':
+                    if (!introduced) {
+                        var user_list = JSON.parse(msg.value);
+                        for (var i = 0; i < user_list.length; i++) {
+                            AddUser(user_list[i].Name);
+                        }
+                        introduced = 1;
+                    }
+                    break;
+            }
         }
     }
 
@@ -19698,7 +19836,10 @@ module.exports = function () {
         InitUsers: InitUsers,
         DeInitUsers: DeInitUsers,
         SetScrollSpeed: SetScrollSpeed,
-        ScrollSpeed: scrollSpeed
+        ScrollSpeed: scrollSpeed,
+        GetUsername: function GetUsername() {
+            return my_username;
+        }
     };
 }();
 
@@ -19724,6 +19865,7 @@ window.LWxSP = __webpack_require__("./resources/assets/js/platforms/proprietary.
 module.exports = function () {
     var Platform = { name: '', object: {} };
     var ws = undefined;
+    var info;
 
     function InitPlatformFromUrl(url) {
         // First of all strip parameters and trim spaces and slashes from the URL
@@ -19786,10 +19928,12 @@ module.exports = function () {
         }
     }
 
-    function CreateEventHandlers(roomID) {
+    function CreateEventHandlers(json_info) {
+        info = JSON.parse(json_info);
+
         if (!ws) {
             // Initialize the WebSocket
-            ws = uWS.connect('ws://109.104.194.40:3000/' + roomID);
+            ws = uWS.connect('ws://109.104.194.40:3000/' + info.stream_key);
         }
 
         ws.addEventListener('message', MessageHandler);
@@ -19819,7 +19963,7 @@ module.exports = function () {
         // Chat
         LW_Chat.InitChat(ws, document.getElementById('chat-wrapper'));
         // Users
-        LW_Users.InitUsers(ws);
+        LW_Users.InitUsers(ws, info.username);
     }
 
     function FormAction(input, button, func) {
@@ -19843,8 +19987,13 @@ module.exports = function () {
     }
 
     function MessageHandler(e) {
-        if (e.data.match(/^media: /)) {
-            NewVideo(e.data.substring(7, e.data.length));
+        var msg;
+        if (msg = uWS.isValidObject(e.data, 'media')) {
+            switch (msg.command) {
+                case 'new':
+                    NewVideo(msg.value);
+                    break;
+            }
         }
     }
 

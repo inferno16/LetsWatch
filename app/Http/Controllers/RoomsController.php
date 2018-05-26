@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Custom\Base64Url;
 use App\Room;
+use App\TempUser;
+use Illuminate\Support\Facades\DB;
 
 class RoomsController extends Controller
 {
@@ -32,10 +34,18 @@ class RoomsController extends Controller
             return redirect('/')->with('errors', 'An unexpected error occured while creating the room.');
     }
 
-    public function join($id) {
+    public function join($id, Request $request) {
         $room = Room::where('stream_key', $id)->first();
         if(!$room)
             return redirect('/');
-        return view('room')->with('roomID', $id);
+        $tu = new TempUser;
+        $ip = DB::connection()->getPdo()->quote($request->ip());
+        $tu->identifier = DB::raw("INET_ATON('109.104.194.40')");
+        $tu->username = (auth()->check()) ? auth()->user()->username : uniqid();
+        $tu->save();
+        return view('room')->with('info', [
+            'stream_key' => $id,
+            'username' => $tu->username
+        ]);
     }
 }

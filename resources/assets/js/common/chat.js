@@ -3,7 +3,6 @@ module.exports = (function(){
     var init = false;
     var chat;
     var player;
-    var last_message = ''; // For testing purposes
     function Chat() {
         this.messages;
         this.input;
@@ -36,14 +35,17 @@ module.exports = (function(){
         window[option+'EventListener']('resize', ResizeChat);
         chat.input[option+'EventListener']('keydown', InputKeyDown);
         chat.button[option+'EventListener']('click', SendMessage);
-        ws[option+'EventListener']('message', MessageReceived);
+        ws[option+'EventListener']('message', MessageHandler);
     }
 
-    function MessageReceived(e) {
-        if(e.data.match(/^chat: /)) {
-            var message = e.data.substring(6, e.data.length);
-            ConstructMessage(message, 'User', (message === last_message) ? 'mine' : '');
-            last_message = '';
+    function MessageHandler(e) {
+        var msg;
+        if(msg = uWS.isValidObject(e.data, 'chat')) {
+            switch(msg.command) {
+                case 'message':
+                    ConstructMessage(msg.value, msg.user, (msg.user === LW_Users.GetUsername()) ? 'mine' : '');
+                    break;
+            }
         }
     }
 

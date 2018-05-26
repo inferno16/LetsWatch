@@ -10,6 +10,9 @@
 @import '~bootstrap/scss/bootstrap';
 
 
+*:focus {
+    outline: none;
+}
 
 #main {
     padding: 5px;

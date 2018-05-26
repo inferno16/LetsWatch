@@ -6,6 +6,9 @@ module.exports = (function(){
     var synced = false;
     var timerInterval = 20;
     var scrollSpeed = 10;
+    var my_username;
+    var owner = 0;
+    var introduced = 0;
     function User() {
         this.Name;
         this.Avatar;
@@ -21,8 +24,9 @@ module.exports = (function(){
         return (this.PrevButton && this.NextButton && this.UserContainer);
     }
 
-    function InitUsers(uWebSocketConnection) {
+    function InitUsers(uWebSocketConnection, username) {
         if(synced) {return;}
+        my_username = username;
         ws = uWebSocketConnection;
         ws.addEventListener('message', MessageHandler);
         nav = new Navigation();
@@ -50,11 +54,32 @@ module.exports = (function(){
     }
 
     function MessageHandler(e) {
-        if(e.data.match(/^user_connected: (.+)$/)) {
-            AddUser(e.data.substring(16, e.data.length));
-        }
-        else if(e.data.match(/^user_dissconnected: (.+)$/)) {
-            RemoveUser(e.data.substring(20, e.data.length));
+        var msg;
+        if(msg = uWS.isValidObject(e.data, 'user')) {
+            switch(msg.command) {
+                case 'connection':
+                    if(owner) {
+                        uWS.sendIntroduction(JSON.stringify(users), msg.user);
+                    }
+                    AddUser(msg.user);
+                    break;
+                case 'disconnection':
+                    RemoveUser(msg.user);
+                    break;
+                case 'promotion':
+                    introduced = 1;
+                    owner = 1;
+                    break;
+                case 'introduction':
+                    if(!introduced) {
+                        var user_list = JSON.parse(msg.value);
+                        for (let i = 0; i < user_list.length; i++) {
+                            AddUser(user_list[i].Name);
+                        }
+                        introduced = 1;
+                    }
+                    break;
+            }
         }
     }
 
@@ -145,6 +170,7 @@ module.exports = (function(){
         InitUsers: InitUsers,
         DeInitUsers: DeInitUsers,
         SetScrollSpeed: SetScrollSpeed,
-        ScrollSpeed: scrollSpeed
+        ScrollSpeed: scrollSpeed,
+        GetUsername: function() {return my_username;}
     }
 })();

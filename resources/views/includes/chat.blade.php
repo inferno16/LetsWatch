@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header">
-        {{ __('Chatbox for room').' '.$roomID}}
+        {{ __('Chatbox for room').' '.$info['stream_key']}}
     </div>
     <div class="card-body">
         <div class="messages">

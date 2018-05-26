@@ -15,6 +15,7 @@ window.LWxSP = require('../platforms/proprietary');
 module.exports = (function(){
     var Platform = {name:'', object: {}};
     var ws = undefined;
+    var info;
 
     function InitPlatformFromUrl(url) {
         // First of all strip parameters and trim spaces and slashes from the URL
@@ -78,9 +79,11 @@ module.exports = (function(){
         }
     }
 
-    function CreateEventHandlers(roomID) {
+    function CreateEventHandlers(json_info) {
+        info = JSON.parse(json_info);
+
         if(!ws) { // Initialize the WebSocket
-           ws = uWS.connect('ws://109.104.194.40:3000/'+roomID);
+           ws = uWS.connect('ws://109.104.194.40:3000/'+info.stream_key);
         }
 
         ws.addEventListener('message', MessageHandler);
@@ -111,7 +114,7 @@ module.exports = (function(){
         // Chat
         LW_Chat.InitChat(ws, document.getElementById('chat-wrapper'));
         // Users
-        LW_Users.InitUsers(ws);
+        LW_Users.InitUsers(ws, info.username);
     }
 
     function FormAction(input, button, func) {
@@ -133,8 +136,13 @@ module.exports = (function(){
     }
 
     function MessageHandler(e) {
-        if(e.data.match(/^media: /)) {
-            NewVideo(e.data.substring(7, e.data.length));
+        var msg;
+        if(msg = uWS.isValidObject(e.data, 'media')) {
+            switch(msg.command) {
+                case 'new':
+                    NewVideo(msg.value);
+                    break;
+            }
         }
     }
 
