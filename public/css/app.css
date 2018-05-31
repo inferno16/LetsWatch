@@ -10411,12 +10411,298 @@ a.text-dark:focus {
   }
 }
 
+/*!
+ * Generated with CSS Flag Sprite generator (https://www.flag-sprites.com/)
+ */
+
+.flag {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: url("/storage/images/flags.png") no-repeat;
+}
+
+.flag.flag-bg {
+  background-position: 0 0;
+}
+
+.flag.flag-en {
+  background-position: -24px 0;
+}
+
+.cb-slideshow {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  z-index: 0;
+}
+
+.cb-slideshow li {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  z-index: 0;
+  opacity: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-animation: imageAnimation 30s linear infinite 0s;
+          animation: imageAnimation 30s linear infinite 0s;
+}
+
+.cb-slideshow li div {
+  z-index: 1;
+  position: absolute;
+  top: 90px;
+  left: 0px;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  -webkit-animation: titleAnimation 30s linear infinite 0s;
+          animation: titleAnimation 30s linear infinite 0s;
+}
+
+.cb-slideshow li div h3 {
+  font-family: 'BebasNeueRegular', 'Arial Narrow', Arial, sans-serif;
+  font-size: 90px;
+  padding: 0;
+  line-height: 100px;
+  color: #fff;
+  text-shadow: -1px -1px 0 #000,   1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.cb-slideshow li:nth-child(1) {
+  background-image: url("/storage/images/slider/5.jpg");
+}
+
+.cb-slideshow li:nth-child(2) {
+  background-image: url("/storage/images/slider/4.jpg");
+  -webkit-animation-delay: 6s;
+          animation-delay: 6s;
+}
+
+.cb-slideshow li:nth-child(3) {
+  background-image: url("/storage/images/slider/3.jpg");
+  -webkit-animation-delay: 12s;
+          animation-delay: 12s;
+}
+
+.cb-slideshow li:nth-child(4) {
+  background-image: url("/storage/images/slider/2.jpg");
+  -webkit-animation-delay: 18s;
+          animation-delay: 18s;
+}
+
+.cb-slideshow li:nth-child(5) {
+  background-image: url("/storage/images/slider/1.jpg");
+  -webkit-animation-delay: 24s;
+          animation-delay: 24s;
+}
+
+.cb-slideshow li:nth-child(2) div {
+  -webkit-animation-delay: 6s;
+          animation-delay: 6s;
+}
+
+.cb-slideshow li:nth-child(3) div {
+  -webkit-animation-delay: 12s;
+          animation-delay: 12s;
+}
+
+.cb-slideshow li:nth-child(4) div {
+  -webkit-animation-delay: 18s;
+          animation-delay: 18s;
+}
+
+.cb-slideshow li:nth-child(5) div {
+  -webkit-animation-delay: 24s;
+          animation-delay: 24s;
+}
+
+@-webkit-keyframes imageAnimation {
+  0% {
+    opacity: 0;
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in;
+  }
+
+  8% {
+    opacity: 1;
+    -webkit-transform: scale(1.05);
+            transform: scale(1.05);
+    -webkit-animation-timing-function: ease-out;
+            animation-timing-function: ease-out;
+  }
+
+  17% {
+    opacity: 1;
+    -webkit-transform: scale(1.1) rotate(3deg);
+            transform: scale(1.1) rotate(3deg);
+  }
+
+  25% {
+    opacity: 0;
+    -webkit-transform: scale(1.1) rotate(3deg);
+            transform: scale(1.1) rotate(3deg);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes imageAnimation {
+  0% {
+    opacity: 0;
+    -webkit-animation-timing-function: ease-in;
+            animation-timing-function: ease-in;
+  }
+
+  8% {
+    opacity: 1;
+    -webkit-transform: scale(1.05);
+            transform: scale(1.05);
+    -webkit-animation-timing-function: ease-out;
+            animation-timing-function: ease-out;
+  }
+
+  17% {
+    opacity: 1;
+    -webkit-transform: scale(1.1) rotate(3deg);
+            transform: scale(1.1) rotate(3deg);
+  }
+
+  25% {
+    opacity: 0;
+    -webkit-transform: scale(1.1) rotate(3deg);
+            transform: scale(1.1) rotate(3deg);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes titleAnimation {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-200px);
+            transform: translateY(-200px);
+  }
+
+  8% {
+    opacity: 1;
+    -webkit-transform: translateY(0px);
+            transform: translateY(0px);
+  }
+
+  17% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+
+  19% {
+    opacity: 0;
+  }
+
+  25% {
+    opacity: 0;
+    -webkit-transform: scale(10);
+            transform: scale(10);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes titleAnimation {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-200px);
+            transform: translateY(-200px);
+  }
+
+  8% {
+    opacity: 1;
+    -webkit-transform: translateY(0px);
+            transform: translateY(0px);
+  }
+
+  17% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1);
+  }
+
+  19% {
+    opacity: 0;
+  }
+
+  25% {
+    opacity: 0;
+    -webkit-transform: scale(10);
+            transform: scale(10);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Show at least something when animations not supported */
+
+.ie-9 .cb-slideshow li {
+  opacity: 1;
+  background-image: url("/storage/images/slider/1.jpg");
+}
+
+@media screen and (max-width: 1400px) {
+  .cb-slideshow li div h3 {
+    font-size: 60px;
+    line-height: 70px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .cb-slideshow li div h3 {
+    font-size: 30px;
+    line-height: 40px;
+  }
+}
+
 *:focus {
   outline: none;
 }
 
 #main {
   padding: 5px;
+}
+
+.navbar {
+  z-index: 1;
+}
+
+.navbar .navbar-brand {
+  font-family: "Raleway", sans-serif;
+  padding: 0;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.navbar .navbar-brand img {
+  height: 40px;
+  margin-top: -5px;
+  width: auto;
 }
 
 #room-users {
@@ -10589,6 +10875,23 @@ a.text-dark:focus {
 
 .lw-btn:hover {
   background: #ddd;
+}
+
+.new-room-btn {
+  position: absolute;
+  height: 50px;
+  width: 150px;
+  top: 70%;
+  left: 50%;
+  margin-left: -75px;
+  z-index: 1;
+  background: #a1d6e2;
+  border: 1px solid #bcbabe;
+  font-weight: bold;
+}
+
+.new-room-btn:hover {
+  background: #1995ad;
 }
 
 #player-wrapper {

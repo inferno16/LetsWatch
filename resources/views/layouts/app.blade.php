@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
+<!--[if lt IE 9 ]>    <html class="ie ie-9 ie-lt-9" lang="{{ app()->getLocale() }}"> <![endif]-->
+<!--[if IE 9 ]>       <html class="ie ie-9" lang="{{ app()->getLocale() }}"> <![endif]-->
+<!--[if gt IE 9]><!--><html lang="{{ app()->getLocale() }}"><!--<![endif]-->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="{{ config('app.name', 'Laravel') }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ config('app.url', 'http://localhost') }}" />
+    <meta property="og:image" content="{{ config('app.url', 'http://localhost') }}/storage/images/logo-big.png" />
+    <meta property="og:description" content="{{__('Watch videos and listen music with your friends.')}}" />
     @yield('meta')
 
     <!-- CSRF Token -->

@@ -9,6 +9,9 @@
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
 
+@import 'flags';
+@import 'image-slider';
+
 
 *:focus {
     outline: none;
@@ -16,6 +19,20 @@
 
 #main {
     padding: 5px;
+}
+
+.navbar {
+    z-index: 1;
+    .navbar-brand{
+        font-family: "Raleway", sans-serif;
+        padding: 0;
+        user-select: none;
+        img {
+            height: 40px;
+            margin-top: -5px;
+            width: auto;
+        }
+    }
 }
 
 #room-users {
@@ -154,6 +171,23 @@
 
 .lw-btn:hover {
     background: #ddd;
+}
+
+.new-room-btn {
+    position: absolute;
+    height: 50px;
+    width: 150px;
+    top: 70%;
+    left: 50%;
+    margin-left: -75px;
+    z-index: 1;
+    background: #a1d6e2;
+    border: 1px solid #bcbabe;
+    font-weight: bold;
+}
+
+.new-room-btn:hover {
+    background: #1995ad;
 }
 
 #player-wrapper {

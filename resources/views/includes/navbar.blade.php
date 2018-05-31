@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
     <div class="container">
         <a class="navbar-brand" href="{{ url('/') }}">
+            <img src="/storage/images/logo-small.png" alt="logo">
             {{ config('app.name', 'Laravel') }}
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,7 +16,16 @@
 
             <!-- Right Side Of Navbar -->
             <ul class="navbar-nav ml-auto">
-                <!-- Authentication Links -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown-locale" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img src="/storage/images/blank.gif" class="flag flag-{{\APP::getLocale()}}"> {{strtoupper(\App::getLocale())}}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdown-locale">
+                            <a class="dropdown-item" href="#" onclick="LW.ChangeLocale(0)">EN</a>
+                            <a class="dropdown-item" href="#" onclick="LW.ChangeLocale(1)">BG</a>
+                        </div>
+                    </li>
+                @include('includes.locale')
                 @guest
                     <li><a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a></li>
                     <li><a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a></li>
@@ -26,6 +36,7 @@
                         </a>
 
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/profile">{{ __('Profile') }}</a>
                             <a class="dropdown-item" href="{{ route('logout') }}"
                                onclick="event.preventDefault();
                                              document.getElementById('logout-form').submit();">

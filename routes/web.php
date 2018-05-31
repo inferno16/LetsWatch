@@ -21,3 +21,4 @@ Route::get('/room/{id}', 'RoomsController@join');
 Auth::routes();
 
 Route::get('/profile', 'ProfileController@index');
+Route::post('changelocale', ['as' => 'changelocale', 'uses' => 'TranslationController@changeLocale']);

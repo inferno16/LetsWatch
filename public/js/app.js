@@ -19997,9 +19997,18 @@ module.exports = function () {
         }
     }
 
+    function ChangeLocale(index) {
+        var locale = document.getElementById('locale');
+        if (locale.selectedIndex != index) {
+            locale.selectedIndex = index;
+            locale.dispatchEvent(new Event('change'));
+        }
+    }
+
     return {
         CreateEventHandlers: CreateEventHandlers,
-        NewVideo: NewVideo
+        NewVideo: NewVideo,
+        ChangeLocale: ChangeLocale
     };
 }();
 
