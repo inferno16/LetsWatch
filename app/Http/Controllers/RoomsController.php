@@ -28,10 +28,10 @@ class RoomsController extends Controller
             $room_found = Room::find($stream_key);
         } while($room_found);
         $room->stream_key = $stream_key;
-        if($room->save())
-            return redirect('/room/'.$room->stream_key);
-        else
-            return redirect('/')->with('errors', 'An unexpected error occured while creating the room.');
+
+        return ($room->save()) ?
+            redirect('/room/'.$room->stream_key) :
+            redirect('/')->with('errors', 'An unexpected error occured while creating the room.');
     }
 
     public function join($id, Request $request) {
@@ -39,26 +39,15 @@ class RoomsController extends Controller
         if(!$room)
             return redirect('/');
         $tu = new TempUser;
-        $ip = DB::connection()->getPdo()->quote($this->getIp());
+        $ip = DB::connection()->getPdo()->quote(request()->ip());
         $tu->identifier = DB::raw("INET_ATON($ip)");
-        $tu->username = (auth()->check()) ? auth()->user()->username : uniqid();
-        $tu->save();
-        return view('room')->with('info', [
-            'stream_key' => $id,
-            'username' => $tu->username
-        ]);
-    }
+        $tu->username = (auth()->check()) ? auth()->user()->email : uniqid();
 
-    private function getIp(){
-        foreach (array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR') as $key){
-            if (array_key_exists($key, $_SERVER) === true){
-                foreach (explode(',', $_SERVER[$key]) as $ip){
-                    $ip = trim($ip); // just to be safe
-                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false){
-                        return $ip;
-                    }
-                }
-            }
-        }
+        return ($tu->save()) ? 
+            view('room')->with('info', [
+                'stream_key' => $id,
+                'username' => $tu->username
+            ]) :
+            redirect('/')->with('errors', 'An unexpected error occured while creating the room.');
     }
 }

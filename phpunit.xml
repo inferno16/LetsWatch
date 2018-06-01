@@ -20,6 +20,10 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">./app</directory>
+            <exclude>
+                <directory suffix=".php">./app/Exceptions</directory>
+                <file>./app/Providers/BroadcastServiceProvider.php</file>
+            </exclude>
         </whitelist>
     </filter>
     <php>
@@ -29,5 +33,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
         <env name="MAIL_DRIVER" value="array"/>
+        <env name="DB_CONNECTION" value="testing"/>
     </php>
 </phpunit>

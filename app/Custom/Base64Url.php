@@ -9,8 +9,8 @@
             return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
         }
         static function generate($length) {
-            if($length > 16 || $length < 6)
-                return 'length: '.$length;
+            if(!is_int($length) || $length > 16 || $length < 6)
+                throw new \InvalidArgumentException('Expected argument is Integer (min:6 max:16). Input was: '.$length);
             $str = "";
             $alphabet = array_merge(range('A','Z'), range('a', 'z'), range('0', '9'), ['-', '_']);
             $max = count($alphabet) - 1;
