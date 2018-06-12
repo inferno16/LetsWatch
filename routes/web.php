@@ -11,9 +11,8 @@
 |
 */
 
-Route::get('/{uri}', function () {
-    return view('home');
-})->where(['uri' => '(home)?']);
+Route::get('/{uri}', 'PagesController@index')->where(['uri' => '(home)?']);
+Route::get('/about', 'PagesController@about');
 
 Route::post('/room', 'RoomsController@create');
 Route::get('/room/{id}', 'RoomsController@join');

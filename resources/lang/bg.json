@@ -14,6 +14,9 @@
     "Send": "Изпрати",
     "Paste video URL here": "Постави видео линк тук",
     "An unexpected error occured while creating the room.": "Възникна неочаквана грешка при създаването на стаята.",
+    "Community": "Общност",
+    "Forum": "Форум",
+    "About": "За проекта",
     "Profile": "Профил",
     "Logout": "Излизане",
     "Dashboard": "Табло",
@@ -22,5 +25,13 @@
     "Don't have time for your friends?": "Нямаш време за приятелите си?",
     "Maybe they live far from you?": "Може би ви дели голямо разстояние?",
     "Or you are just not in a mood?": "Или просто не сте в настроение?",
-    "You can spend time with your friends NOW!": "Можете да прекарате време с приятелите си СЕГА!"
+    "You can spend time with your friends NOW!": "Можете да прекарате време с приятелите си СЕГА!",
+    "Project information": "Информация за проекта",
+    "This applications is a diploma project": "Това приложение е дипломен проект",
+    "Author: Ivan Krasimirov Angelov": "Автор: Иван Красимиров Ангелов",
+    "University: Technical University of Varna": "Университет: Технически Университет-Варна",
+    "Specialty: CST (Computer Science and Technologies)": "Специалност: КСТ (Компютърни Системи и Технологии)",
+    "Group: 3b": "Група: 3б",
+    "Faculty №": "Факултетен №",
+    "Source code repositories": "Хранилища на изходния код"
 }

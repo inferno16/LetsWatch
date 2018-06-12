@@ -11,7 +11,15 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Left Side Of Navbar -->
             <ul class="navbar-nav mr-auto">
-
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="dropdown-community" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{__('Community')}}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdown-community">
+                                <a class="dropdown-item" href="/forum">{{__('Forum')}}</a>
+                                <a class="dropdown-item" href="/about">{{__('About')}}</a>
+                        </div>
+                    </li>
             </ul>
 
             <!-- Right Side Of Navbar -->
