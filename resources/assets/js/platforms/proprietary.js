@@ -78,24 +78,17 @@ module.exports = (function() {
     }
 
     function MessageHandler(e) {
-        if(e.data.match(/^video: /i)) {
-            NewVideo(e.data.substring(7, e.data.length));
-        }
-        else if (e.data.match(/^player: /i)) {
-            var cmd = (e.data.indexOf('(') === -1) ? e.data : e.data.substring(0, e.data.indexOf('('));
-            switch (cmd) {
-                case "player: play":
+        var msg;
+        if (msg = uWS.isValidObject(e.data, 'player')) {
+            switch (msg.command) {
+                case "play":
                     player.play();
                     break;
-                case "player: pause":
+                case "pause":
                     player.pause();
                     break;
-                case "player: seek":
-                    var regex = /\((\d+(\.\d+)?)\)$/;
-                    var matches = regex.exec(e.data);
-                    if (matches.length === 3) {
-                        player.currentTime = matches[1];
-                    }
+                case "seek":
+                    player.currentTime = msg.value;
                     break;
             }
         }

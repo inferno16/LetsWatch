@@ -93,24 +93,20 @@ module.exports = (function(){
         var prevState = statusListener;
         statusListener = sl;
         sync.statusRequest = true;
-        if(e.data.match(/^player: /i)) {
-            var cmd = (e.data.indexOf('(') === -1) ? e.data : e.data.substring(0, e.data.indexOf('('));
-            switch(cmd) {
-                case "player: play":
+        var msg;
+        if(msg = uWS.isValidObject(e.data, 'player')) {
+            switch(msg.command) {
+                case "play":
                     sync.type = YT.PlayerState.PLAYING;
                     player.playVideo();
                     break;
-                case "player: pause":
+                case "pause":
                     sync.type = YT.PlayerState.PAUSED;
                     player.pauseVideo();
                     break;
-                case "player: seek":
-                    var regex = /\((\d+(\.\d+)?)\)$/;
-                    var matches = regex.exec(e.data);
-                    if(matches.length === 3) {
-                        sync.type = YT.PlayerState.BUFFERING;
-                        player.seekTo(matches[1]);
-                    }
+                case "seek":
+                    sync.type = YT.PlayerState.BUFFERING;
+                    player.seekTo(msg.value);
                     break;
                 default:
                     statusListener = prevState;

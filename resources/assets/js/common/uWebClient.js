@@ -115,6 +115,7 @@ module.exports = (function(){
     }
 
     function isNumber(val) {
+        val = val+''; // Make it string so the match function could work
         return val.match(/^[+-]?[0-9]+(\.[0-9]+)$/);
     }
 
@@ -129,7 +130,7 @@ module.exports = (function(){
             if(_obj[jsObj.object].cmds.indexOf(jsObj.command) === -1) {return false;}
             if(jsObj.command in _obj[jsObj.object].vals) {
                 var val = _obj[jsObj.object].vals[jsObj.command];
-                if(val.trim() === '' || (val === 'number' && !isNumber(val))) {return false;}
+                if(val.trim() === '' || (val === 'number' && !isNumber(jsObj.value))) {return false;}
             }
             
         } catch(error) {return false;}

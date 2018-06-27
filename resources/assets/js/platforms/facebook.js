@@ -101,10 +101,10 @@ module.exports = (function(){
 
     function MessageHandler(e) {
         request = true;
-        if (e.data.match(/^player: /i)) {
-            var cmd = (e.data.indexOf('(') === -1) ? e.data : e.data.substring(0, e.data.indexOf('('));
-            switch (cmd) {
-                case "player: play":
+        var msg;
+        if (msg = uWS.isValidObject(e.data, 'player')) {
+            switch (msg.command) {
+                case "play":
                     //playHandler.release("startedPlaying");
                     if (!playing)
                         fb_vid.play();
@@ -112,20 +112,16 @@ module.exports = (function(){
                         request = false;
                     //playHandler = fb_vid.subscribe("startedPlaying", sptmpHandler);
                     break;
-                case "player: pause":
+                case "pause":
                     if (playing)
                         fb_vid.pause();
                     else
                         request = false;
                     break;
-                case "player: seek":
-                    var regex = /\((\d+(\.\d+)?)\)$/;
-                    var matches = regex.exec(e.data);
-                    if (matches.length === 3) {
-                        //bufferHandler.release();
-                        fb_vid.seek(Number.parseFloat(matches[1]));
-                        //bufferHandler = fb_vid.subscribe("startedBuffering", bHandler);
-                    }
+                case "seek":
+                    //bufferHandler.release();
+                    fb_vid.seek(Number.parseFloat(msg.value));
+                    //bufferHandler = fb_vid.subscribe("startedBuffering", bHandler);
                     break;
                 default:
                     request = false;
